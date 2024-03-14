@@ -113,7 +113,7 @@ public class NFControllerLogicDir {
 		String[] users;
 			users = directoryConnector.getUserList();
 			String userslist = String.join(", ", users);
-			System.out.println(userslist);
+			System.out.println("UserList: " + userslist);
 			result = true; 
 		
 		return result;
