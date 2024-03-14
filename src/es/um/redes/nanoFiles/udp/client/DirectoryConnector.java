@@ -234,10 +234,20 @@ public class DirectoryConnector {
 	 * 
 	 * @return La lista de nombres de usuario registrados, o null si el directorio
 	 *         no pudo satisfacer nuestra solicitud
+	 * @throws IOException 
 	 */
-	public String[] getUserList() {
+	public String[] getUserList() throws IOException {
 		String[] userlist = null;
 		// TODO: Ver TODOs en logIntoDirectory y seguir esquema similar
+		DirMessage m = new DirMessage(DirMessageOps.OPERATION_USER_LIST); 
+		String messageUserList = m.toString(); 
+		byte[] sendData = messageUserList.getBytes(); 
+		byte[] response = sendAndReceiveDatagrams(sendData); 
+		DirMessage r = DirMessage.fromString(new String(response));
+		
+		userlist = r.getUsers(); 
+		
+		
 		
 		return userlist;
 	}

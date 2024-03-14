@@ -309,7 +309,9 @@ public class NFDirectoryServer {
 		}
 		
 		case DirMessageOps.OPERATION_USER_LIST:{ 
-			//for (HashMap.Entry<String, Integer> entry : nicks.entrySet()) {}
+			response = new DirMessage(DirMessageOps.OPERATION_USER_LIST);
+			String[] keysArray = nicks.keySet().toArray(new String[0]); 
+			response.setUsers(keysArray); 
 			break; 
 		}
 			

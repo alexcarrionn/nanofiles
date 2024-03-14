@@ -100,17 +100,22 @@ public class NFControllerLogicDir {
 
 	/**
 	 * Método para obtener y mostrar la lista de nicks registrados en el directorio
+	 * @throws IOException 
 	 */
-	protected boolean getAndPrintUserList() {
+	protected boolean getAndPrintUserList() throws IOException {
 		/*
 		 * TODO: Obtener la lista de usuarios registrados. Comunicarse con el directorio
 		 * (a través del directoryConnector) para obtener la lista de nicks registrados
 		 * e imprimirla por pantalla. Devolver éxito/fracaso de la operación.
 		 */
 		boolean result = false;
-
-
-
+		System.out.println("Encontrando a los usuarios: ");
+		String[] users;
+			users = directoryConnector.getUserList();
+			String userslist = String.join(", ", users);
+			System.out.println(userslist);
+			result = true; 
+		
 		return result;
 	}
 

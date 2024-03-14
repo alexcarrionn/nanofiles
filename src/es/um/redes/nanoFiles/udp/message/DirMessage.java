@@ -53,7 +53,7 @@ public class DirMessage {
 	 * diferentes mensajes de este protocolo.
 	 */
 	private String nickname;
-	private List<String> users;
+	private String[] users ;
 	private int sessionKey;
 	private int port;
 	//private boolean isServer;
@@ -74,6 +74,7 @@ public class DirMessage {
 
 	public DirMessage(String op) {
 		operation = op;
+		users = new String[0]; 
 	}
 
 
@@ -112,11 +113,11 @@ public class DirMessage {
 		this.loginok = loginok;
 	}
 	
-	public List<String> getUsers() {
-		return Collections.unmodifiableList(users);
+	public String[] getUsers() {
+		return users;
 	}
 
-	public void setUsers(List<String> userlist) {
+	public void setUsers(String[] userlist) {
 		this.users = userlist;
 	}
 
@@ -192,9 +193,8 @@ public class DirMessage {
 			}
 			case FIELDNAME_USERLIST: {
 				assert (m.getOperation().equals(DirMessageOps.OPERATION_USER_LIST));
-				String[] usuarios = value.split(String.valueOf(DELIMITER));
-				List<String> users = Arrays.asList(usuarios);
-				m.setUsers(users);
+				value = value.substring(1, value.length()-1); 
+				m.setUsers(value.split(", ")); 
 				break;
 			}
 			case FIELDNAME_PORT: {
@@ -241,9 +241,9 @@ public class DirMessage {
 			}break;
 		}
 		case DirMessageOps.OPERATION_USER_LIST: {
-			String userslist = String.join(", ", users); 
-			sb.append(FIELDNAME_USERLIST + DELIMITER + userslist + END_LINE);
-			break;
+			if(users.length != 0) {
+			sb.append(FIELDNAME_USERLIST + DELIMITER + Arrays.toString(users) + END_LINE);
+			break;}
 		}
 		case DirMessageOps.OPERATION_FGSERVE: {
 			sb.append(FIELDNAME_USERLIST + DELIMITER + port + END_LINE);
