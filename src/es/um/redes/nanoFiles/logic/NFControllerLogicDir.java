@@ -88,10 +88,10 @@ public class NFControllerLogicDir {
 		 */
 		boolean result = false; 
 		if(directoryConnector.logoutFromDirectory()) {
-			System.out.println("logged in. Ok");
+			System.out.println("logged out Ok");
 			result=true; 
 		}else {
-			System.out.println("logIntoDirectory ha devuelto error");
+			System.err.println("Logged out ERROR");
 		}
 
 

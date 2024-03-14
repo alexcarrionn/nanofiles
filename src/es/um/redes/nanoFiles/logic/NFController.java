@@ -110,6 +110,9 @@ public class NFController {
 			 * que está activo y disponible, y registrar un nombre de usuario.
 			 */
 			commandSucceeded = controllerDir.doLogin(directory, nickname);
+			if(commandSucceeded) {
+				currentState = LOGGED_IN; 
+			}
 			break;
 		case NFCommands.COM_LOGOUT:
 			/*
@@ -117,6 +120,9 @@ public class NFController {
 			 * el nombre de usuario registrado (método doLogout).
 			 */
 			commandSucceeded = controllerDir.doLogout();
+			if(commandSucceeded) {
+				currentState = LOGGED_OUT; 
+			}
 			break;
 		case NFCommands.COM_USERLIST:
 			/*

@@ -300,10 +300,16 @@ public class NFDirectoryServer {
 
 		case DirMessageOps.OPERATION_LOGIN_OUT:{
 			String username = msg.getNickname();
-			nicks.remove(username); 
+			//int SessionKey = nicks.get(username);
+			nicks.remove(username);  
 			//sessionKeys.remove(SessionKey); 
 			response = new DirMessage(DirMessageOps.OPERATION_LOGIN_OUT); 
 			response.setLogout(true); 
+			break; 
+		}
+		
+		case DirMessageOps.OPERATION_USER_LIST:{ 
+			//for (HashMap.Entry<String, Integer> entry : nicks.entrySet()) {}
 			break; 
 		}
 			

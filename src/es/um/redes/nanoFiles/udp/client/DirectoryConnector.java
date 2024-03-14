@@ -57,7 +57,8 @@ public class DirectoryConnector {
 	private int sessionKey = INVALID_SESSION_KEY;
 	private boolean successfulResponseStatus;
 	private String errorDescription;
-	private String nickname; 
+	private String username; 
+	
 	public DirectoryConnector(String address) throws IOException {
 
 		InetAddress serverIp = InetAddress.getByName(address);
@@ -67,12 +68,9 @@ public class DirectoryConnector {
 
 
 	}
-	
-	
-	
 
-	public String getNickname() {
-		return nickname;
+	public String getUsername() {
+		return username;
 	}
 
 
@@ -208,63 +206,24 @@ public class DirectoryConnector {
 	public boolean logIntoDirectory(String nickname) throws IOException {
 		assert (sessionKey == INVALID_SESSION_KEY);
 		boolean success = false;
-		/*
-		// Debe enviar un datagrama con la cadena "login&nickname", donde nickname 
-				// será el valor delparámetro pasado al comando login por el shell.
-				String messageLogin = "login&" + nickname;
-				
-				// Debe usar el método sendAndReceiveDatagrams programado en 
-				// el boletín anterior para enviar y recibir datagramas.
-				byte[] sendData = messageLogin.getBytes();
-				byte[] response = sendAndReceiveDatagrams(sendData);
-				
-				// Debe comprobar que la respuesta recibida consiste en la cadena de caracteres
-				// "loginok&NUM", donde NUM será un número entero entre 0 y 1000 (es decir, 
-				// la sessionKey).
-				boolean ok = new String(response).split("&")[0].equals("loginok");
-				int NUM = Integer.parseInt(new String(response).split("&")[1]); 
-				if (ok && NUM > 0 && NUM < 1000) {
-					sessionKey = NUM; 
-		            System.out.println("El valor de NUM es: " + sessionKey);
-		            success=true; 
-		        } else {
-		            System.err.println("No se encontró un valor NUM en la cadena.");
-		        }
-				return success; 
-		*/
 		// TODO: 1.Crear el mensaje a enviar (objeto DirMessage) con atributos adecuados
 		// (operation, etc.) NOTA: Usar como operaciones las constantes definidas en la clase
 		// DirMessageOps
-		DirMessage dirmessage = new DirMessage (DirMessageOps.OPERATION_LOGIN);
-		dirmessage.setNickname(nickname);
-		
-		// TODO: 2.Convertir el objeto DirMessage a enviar a un string (método toString)
-		String op = dirmessage.toString(); 
-		
-		// TODO: 3.Crear un datagrama con los bytes en que se codifica la cadena
-		byte[] receptionBuffer = op.getBytes();
-		DatagramPacket mensaje = new DatagramPacket(receptionBuffer, receptionBuffer.length, directoryAddress);
-		// TODO: 4.Enviar datagrama y recibir una respuesta (sendAndReceiveDatagrams).
-		byte[] response = sendAndReceiveDatagrams(mensaje.getData()); 
-		
-		// TODO: 5.Convertir respuesta recibida en un objeto DirMessage (método
-		// DirMessage.fromString)
-		DirMessage received = DirMessage.fromString(new String(response)); 
-		
-		// TODO: 6.Extraer datos del objeto DirMessage y procesarlos (p.ej., sessionKey) guardar la sessionkey y mostrarla por pantalla.
-		
-		if(received != null) { 
-			sessionKey = received.getSessionKey();
-			successfulResponseStatus=received.getLoginOk(); 
-			success=successfulResponseStatus; }
-		
-		// TODO: 7.Devolver éxito/fracaso de la operación
-		if (!success) {
-			 System.err.println("No se ha podidio realizar la operación");
+		username = nickname; 
+		DirMessage m = new DirMessage(DirMessageOps.OPERATION_LOGIN); 
+		String messageLogin = m.toString(); 
+		byte[] sendData = messageLogin.getBytes(); 
+		byte[] response = sendAndReceiveDatagrams(sendData); 
+		DirMessage r = DirMessage.fromString(new String(response)); 
+		boolean loginok = r.getLoginOk(); 
+		int num = r.getSessionKey(); 
+		if(loginok && num <= 10000) {
+			System.out.println("Session key assigned is: "+num);
+			sessionKey = num; 
+			success = true;
+			return success; 
 		}
-		else{
-        System.out.println("Se ha podido realizar la operacion con exito");}
-		
+		System.err.println("No se ha encontrado");
 		return success; 
 	}
 		
@@ -280,8 +239,6 @@ public class DirectoryConnector {
 		String[] userlist = null;
 		// TODO: Ver TODOs en logIntoDirectory y seguir esquema similar
 		
-
-
 		return userlist;
 	}
 
@@ -294,7 +251,7 @@ public class DirectoryConnector {
 	public boolean logoutFromDirectory() throws IOException {
 		// TODO: Ver TODOs en logIntoDirectory y seguir esquema similar
 		DirMessage m = new DirMessage(DirMessageOps.OPERATION_LOGIN_OUT); 
-		m.setNickname(this.getNickname());
+		m.setNickname(this.getUsername());
 		String messageLoginOut = m.toString(); 
 		byte[] receptionBuffer = messageLoginOut.getBytes();
 		// TODO: 4.Enviar datagrama y recibir una respuesta (sendAndReceiveDatagrams).
@@ -302,11 +259,13 @@ public class DirectoryConnector {
 		DirMessage r = DirMessage.fromString(new String(response)); 
 		
 		boolean logout = r.isLogout(); 
+		logout = true; 
+		
 		if(logout) {
 			return true; 
 		}
-		
-		return false;
+		else
+			return false;
 		 
 	}
 
