@@ -234,6 +234,7 @@ public class NFController {
 		 */
 		boolean commandAllowed = true;
 		switch (currentCommand) {
+		
 		case NFCommands.COM_MYFILES: {
 			commandAllowed = true;
 			break;
@@ -244,8 +245,13 @@ public class NFController {
 				System.err.println("* You cannot login because you are not logged out from the directory");
 			}
 			break;
-
-
+			
+		case NFCommands.COM_LOGOUT:
+			if (currentState != LOGGED_IN) {
+				commandAllowed = false;
+				System.err.println("You can't log out because you're not logged in.");
+			}
+			break;
 
 		default:
 			// System.err.println("ERROR: undefined behaviour for " + currentCommand + "
@@ -269,7 +275,10 @@ public class NFController {
 			break;
 		}
 
-
+		case NFCommands.COM_LOGOUT: {
+			currentState = LOGGED_OUT;
+			break;
+		}
 
 		default:
 		}
