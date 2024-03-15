@@ -120,9 +120,9 @@ public class NFController {
 			 * el nombre de usuario registrado (método doLogout).
 			 */
 			commandSucceeded = controllerDir.doLogout();
-			if(commandSucceeded) {
+			/*if(commandSucceeded) {
 				currentState = LOGGED_OUT; 
-			}
+			}*/
 			break;
 		case NFCommands.COM_USERLIST:
 			/*

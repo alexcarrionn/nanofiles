@@ -64,13 +64,6 @@ public class DirMessage {
 
 
 
-	public boolean isLogout() {
-		return logout;
-	}
-
-	public void setLogout(boolean logout) {
-		this.logout = logout;
-	}
 
 	public DirMessage(String op) {
 		operation = op;
@@ -129,6 +122,13 @@ public class DirMessage {
 		this.port = port;
 	}
 
+	public boolean isLogout() {
+		return logout;
+	}
+
+	public void setLogout(boolean logout) {
+		this.logout = logout;
+	}
 
 
 	/**
@@ -148,7 +148,7 @@ public class DirMessage {
 		 */
 
 		System.out.println("DirMessage read from socket:");
-		// System.out.println(message);
+		System.out.println(message);
 		
 		String[] lines = message.split(END_LINE + "");
 		// Local variables to save data during parsing
@@ -234,16 +234,17 @@ public class DirMessage {
 			if(nickname != null) {
 			sb.append(FIELDNAME_NICKNAME + DELIMITER + nickname + END_LINE);}
 			else {
-				if(loginok ==true) {
+				if(loginok==true) {
 				sb.append(FIELDNAME_SESSIONKEY + DELIMITER + sessionKey + END_LINE);
 				}
 				sb.append(FIELDNAME_LOGINOK + DELIMITER + loginok + END_LINE);
 			}break;
 		}
 		case DirMessageOps.OPERATION_USER_LIST: {
-			if(users.length != 0) {
-			sb.append(FIELDNAME_USERLIST + DELIMITER + Arrays.toString(users) + END_LINE);
-			break;}
+			if(users.length != 0 && !(users.length <0)) {
+				sb.append(FIELDNAME_USERLIST + DELIMITER + Arrays.toString(users) + END_LINE);
+			}
+			break;
 		}
 		case DirMessageOps.OPERATION_FGSERVE: {
 			sb.append(FIELDNAME_USERLIST + DELIMITER + port + END_LINE);

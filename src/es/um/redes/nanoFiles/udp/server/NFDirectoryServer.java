@@ -44,7 +44,7 @@ public class NFDirectoryServer {
 	 * registrados, etc.
 	 */
 
-
+	private HashMap<String, InetSocketAddress> clientsAddresses;
 
 
 	/**
@@ -148,7 +148,7 @@ public class NFDirectoryServer {
 					 * cadena "loginok". Si el mensaje recibido no es "login", se informa del error
 					 * y no se envía ninguna respuesta.
 					 */
-					if (messageFromClient.equals("login")) {
+					/*if (messageFromClient.equals("login")) {
 						int  NUM = random.nextInt(10000);
 						String data = "loginok&"+NUM;
 						byte[] sendData =  data.getBytes();
@@ -162,7 +162,8 @@ public class NFDirectoryServer {
 					}
 
 
-				} else { // Servidor funcionando en modo producción (mensajes bien formados)
+				} else {
+				// Servidor funcionando en modo producción (mensajes bien formados)
 
 					// Vemos si el mensaje debe ser ignorado por la probabilidad de descarte
 					/*
@@ -216,7 +217,8 @@ public class NFDirectoryServer {
 					 * Después, usar la cadena para construir un objeto DirMessage que contenga en
 					 * sus atributos los valores del mensaje (fromString).
 					 */
-					System.out.println("La cadena recibida es \""+ messageFromClient +"\"");
+					//System.out.println("La cadena recibida es \""+ messageFromClient +"\"");
+				}else {
 					DirMessage op = DirMessage.fromString(messageFromClient);
 					/*
 					 * TODO: Llamar a buildResponseFromRequest para construir, a partir del objeto
@@ -292,19 +294,23 @@ public class NFDirectoryServer {
 			 * (éxito o fracaso) con los datos relevantes, a modo de depuración en el
 			 * servidor
 			 */
-			System.out.println("Response to the operation login sent to: "+clientAddr);
+			/*System.out.println("Response to the operation login sent to: "+clientAddr);
 			System.out.println("The message is: "+ response.toString());
-			return response; 
+			return response; */
+			break; 
+			 
 		}
 
 
 		case DirMessageOps.OPERATION_LOGIN_OUT:{
 			String username = msg.getNickname();
-			//int SessionKey = nicks.get(username);
-			nicks.remove(username);  
-			//sessionKeys.remove(SessionKey); 
-			response = new DirMessage(DirMessageOps.OPERATION_LOGIN_OUT); 
-			response.setLogout(true); 
+			int sessionKey = nicks.get(username);
+			nicks.remove(username);
+			sessionKeys.remove(sessionKey);
+			
+			response = new DirMessage(DirMessageOps.OPERATION_LOGIN_OUT);
+			response.setLogout(true);
+			
 			break; 
 		}
 		

@@ -69,10 +69,6 @@ public class DirectoryConnector {
 
 	}
 
-	public String getUsername() {
-		return username;
-	}
-
 
 
 
@@ -123,11 +119,11 @@ public class DirectoryConnector {
 		
 		for(int i = 0; i< MAX_NUMBER_OF_ATTEMPTS; i++) {
 			try {
-			socket.receive(packetFromServer);
-			response = Arrays.copyOfRange(responseData, 0, packetFromServer.getLength());
-			SocketAddress responseAddr = packetFromServer.getSocketAddress();
-			System.out.println("Datagram received from server at addr " + responseAddr);
-			break; 
+				socket.receive(packetFromServer);
+				response = Arrays.copyOfRange(responseData, 0, packetFromServer.getLength());
+				SocketAddress responseAddr = packetFromServer.getSocketAddress();
+				System.out.println("Datagram received from server at addr " + responseAddr);
+				break; 
 		}catch (SocketTimeoutException e) {
 			System.out.println("socket.receive() reachered TIMEOUT. " + (MAX_NUMBER_OF_ATTEMPTS-i) + " attemps remaining.");
 			if( i== MAX_NUMBER_OF_ATTEMPTS) {
@@ -176,13 +172,10 @@ public class DirectoryConnector {
 		boolean success = false;
 		String dato = "login"; 
 		String loginok = "loginok"; 
-		byte[] dataToServer = dato.getBytes(); 
-		byte[] dato1 =  sendAndReceiveDatagrams(dataToServer);
-		String datoToStr = new String (dato1);
-		if (loginok.equals(datoToStr)) {
-			success=true; 
+		byte[] mandarDato = dato.getBytes();
+		if (Arrays.equals(sendAndReceiveDatagrams(mandarDato), loginok.getBytes())) {
+			success = true;
 		}
-
 		return success;
 	}
 
@@ -192,6 +185,10 @@ public class DirectoryConnector {
 
 	public int getSessionKey() {
 		return sessionKey;
+	}
+	
+	public String getUsername() {
+		return username;
 	}
 
 	/**
@@ -206,25 +203,29 @@ public class DirectoryConnector {
 	public boolean logIntoDirectory(String nickname) throws IOException {
 		assert (sessionKey == INVALID_SESSION_KEY);
 		boolean success = false;
-		// TODO: 1.Crear el mensaje a enviar (objeto DirMessage) con atributos adecuados
-		// (operation, etc.) NOTA: Usar como operaciones las constantes definidas en la clase
-		// DirMessageOps
-		username = nickname; 
-		DirMessage m = new DirMessage(DirMessageOps.OPERATION_LOGIN); 
-		String messageLogin = m.toString(); 
-		byte[] sendData = messageLogin.getBytes(); 
-		byte[] response = sendAndReceiveDatagrams(sendData); 
-		DirMessage r = DirMessage.fromString(new String(response)); 
-		boolean loginok = r.getLoginOk(); 
-		int num = r.getSessionKey(); 
-		if(loginok && num <= 10000) {
-			System.out.println("Session key assigned is: "+num);
-			sessionKey = num; 
-			success = true;
-			return success; 
-		}
-		System.err.println("No se ha encontrado");
-		return success; 
+		
+		username = nickname;
+		DirMessage m = new DirMessage(DirMessageOps.OPERATION_LOGIN);
+		m.setNickname(nickname);
+		String messageLogin = m.toString();
+		
+		byte[] sendData = messageLogin.getBytes();
+		
+		byte[] response = sendAndReceiveDatagrams(sendData);
+		DirMessage r = DirMessage.fromString(new String(response));
+		
+		boolean loginok = r.getLoginOk();
+		int num = r.getSessionKey();
+		
+		if (loginok && num <= 10000) {
+            System.out.println("SessionKey: " + num);
+            sessionKey = num;
+            success = true;
+            return success;
+        }
+		
+		System.err.println("No se ha podido encontrar");
+		return success;
 	}
 		
 	/**
@@ -259,25 +260,23 @@ public class DirectoryConnector {
 	 * @throws IOException 
 	 */
 	public boolean logoutFromDirectory() throws IOException {
-		// TODO: Ver TODOs en logIntoDirectory y seguir esquema similar
-		DirMessage m = new DirMessage(DirMessageOps.OPERATION_LOGIN_OUT); 
+		DirMessage m = new DirMessage(DirMessageOps.OPERATION_LOGIN_OUT);
 		m.setNickname(this.getUsername());
-		String messageLoginOut = m.toString(); 
-		byte[] receptionBuffer = messageLoginOut.getBytes();
-		// TODO: 4.Enviar datagrama y recibir una respuesta (sendAndReceiveDatagrams).
-		byte[] response = sendAndReceiveDatagrams(receptionBuffer); 
-		DirMessage r = DirMessage.fromString(new String(response)); 
+		String messageLogOut = m.toString();
+		byte[] sendData = messageLogOut.getBytes();
 		
-		boolean logout = r.isLogout(); 
-		logout = true; 
+		byte[] response = sendAndReceiveDatagrams(sendData);
+		DirMessage r = DirMessage.fromString(new String(response));
 		
-		if(logout) {
-			return true; 
-		}
-		else
-			return false;
-		 
+		boolean logout = r.isLogout();
+		logout=true; 
+		if (logout) {
+			return true;
+        }
+		
+		return false;
 	}
+		 
 
 	/**
 	 * Método para dar de alta como servidor de ficheros en el puerto indicado a
