@@ -224,7 +224,7 @@ public class DirectoryConnector {
             return success;
         }
 		
-		System.err.println("No se ha podido encontrar");
+		System.err.println("Usuario ya registrado");
 		return success;
 	}
 		
