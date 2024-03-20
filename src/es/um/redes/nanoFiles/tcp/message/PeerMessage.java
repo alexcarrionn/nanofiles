@@ -10,15 +10,15 @@ import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 
-import es.um.redes.nanoFiles.util.FileInfo;
+//import es.um.redes.nanoFiles.util.FileInfo;
 
 public class PeerMessage {
 
-
-
-
 	private byte opcode;
-
+	private byte download; 
+	private byte download_from; 
+	private byte download_fail;  
+	
 	/*
 	 * TODO: Añadir atributos y crear otros constructores específicos para crear
 	 * mensajes con otros campos (tipos de datos)
@@ -45,9 +45,34 @@ public class PeerMessage {
 		return opcode;
 	}
 
+	
+	public byte getDownload() {
+		return download;
+	}
 
+	public void setDownload(byte download) {
+		this.download = download;
+	}
 
+	public byte getDownload_from() {
+		return download_from;
+	}
 
+	public void setDownload_from(byte download_from) {
+		this.download_from = download_from;
+	}
+
+	public byte getDownload_fail() {
+		return download_fail;
+	}
+
+	public void setDownload_fail(byte download_fail) {
+		this.download_fail = download_fail;
+	}
+
+	public void setOpcode(byte opcode) {
+		this.opcode = opcode;
+	}
 
 	/**
 	 * Método de clase para parsear los campos de un mensaje y construir el objeto
