@@ -6,9 +6,9 @@ import java.util.TreeMap;
 public class PeerMessageOps {
 
 	public static final byte OPCODE_INVALID_CODE = 0;
-	public static final byte OPCODE_DOWNLOAD = 0; 
-	public static final byte OPCODE_DOWNLOAD_FROM = 0;
-	public static final byte OPCODE_DOWNLOAD_FAIL = 0;
+	public static final byte OPCODE_DOWNLOAD = 1; 
+	public static final byte OPCODE_DOWNLOAD_FROM = 2;
+	public static final byte OPCODE_DOWNLOAD_FAIL = 3;
 
 
 

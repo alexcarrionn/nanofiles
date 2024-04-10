@@ -15,25 +15,29 @@ import java.nio.ByteBuffer;
 public class PeerMessage {
 
 	private byte opcode;
-	private byte download; 
-	private byte download_from; 
-	private byte download_fail;  
+	private byte[] para1; 
+	private byte[] para2;
+	
+	private static byte longitudByte; 
 	
 	/*
 	 * TODO: Añadir atributos y crear otros constructores específicos para crear
 	 * mensajes con otros campos (tipos de datos)
 	 * 
 	 */
-
-
+	
 
 
 	public PeerMessage() {
 		opcode = PeerMessageOps.OPCODE_INVALID_CODE;
 	}
 
-	public PeerMessage(byte op) {
+	public PeerMessage(byte op, byte[] para1, byte[] para2, byte longitud) {
 		opcode = op;
+		this.para1 = para1;
+		this.para2 = para2; 
+		longitudByte = longitud; 
+		
 	}
 
 	/*
@@ -41,33 +45,35 @@ public class PeerMessage {
 	 * comprobando previamente que dichos atributos han sido establecidos por el
 	 * constructor (sanity checks)
 	 */
+	
+	
 	public byte getOpcode() {
 		return opcode;
 	}
 
-	
-	public byte getDownload() {
-		return download;
+
+	public byte[] getPara1() {
+		return para1;
 	}
 
-	public void setDownload(byte download) {
-		this.download = download;
+	public void setPara1(byte[] para1) {
+		this.para1 = para1;
 	}
 
-	public byte getDownload_from() {
-		return download_from;
+	public byte[] getPara2() {
+		return para2;
 	}
 
-	public void setDownload_from(byte download_from) {
-		this.download_from = download_from;
+	public void setPara2(byte[] para2) {
+		this.para2 = para2;
 	}
 
-	public byte getDownload_fail() {
-		return download_fail;
+	public static byte getLongitudByte() {
+		return longitudByte;
 	}
 
-	public void setDownload_fail(byte download_fail) {
-		this.download_fail = download_fail;
+	public static void setLongitudByte(byte longitudByte) {
+		PeerMessage.longitudByte = longitudByte;
 	}
 
 	public void setOpcode(byte opcode) {
@@ -93,10 +99,9 @@ public class PeerMessage {
 		 */
 		PeerMessage message = new PeerMessage();
 		byte opcode = dis.readByte();
-		switch (opcode) {
-
-
-
+		switch (opcode) { 
+		case PeerMessageOps.OPCODE_DOWNLOAD:  
+			//Implementarlo
 		default:
 			System.err.println("PeerMessage.readMessageFromInputStream doesn't know how to parse this message opcode: "
 					+ PeerMessageOps.opcodeToOperation(opcode));
