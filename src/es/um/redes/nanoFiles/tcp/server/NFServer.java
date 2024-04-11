@@ -1,6 +1,7 @@
 package es.um.redes.nanoFiles.tcp.server;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
@@ -19,9 +20,12 @@ public class NFServer implements Runnable {
 		/*
 		 * TODO: Crear un socket servidor y ligarlo a cualquier puerto disponible
 		 */
-
-
-
+		InetSocketAddress serverSocketAddress = new InetSocketAddress(SERVERSOCKET_ACCEPT_TIMEOUT_MILISECS); 
+		serverSocket = new ServerSocket();
+		serverSocket.setSoTimeout(1000);
+		serverSocket.bind(serverSocketAddress);
+		serverSocket.setReuseAddress(true);
+		
 	}
 
 	/**
@@ -59,6 +63,11 @@ public class NFServer implements Runnable {
 	 */
 
 
-
+	public void startServer() {
+		new Thread(this).start(); 
+	}
+	
+	public void stopserver() {
+}
 
 }
