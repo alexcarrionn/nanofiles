@@ -8,6 +8,8 @@ import java.net.InetSocketAddress;
 import java.util.LinkedList;
 import java.util.Random;
 
+import es.um.redes.nanoFiles.tcp.server.NFServerSimple;
+
 
 
 
@@ -26,12 +28,22 @@ public class NFControllerLogicP2P {
 
 	/**
 	 * Método para arrancar un servidor de ficheros en primer plano.
+	 * @throws IOException 
 	 * 
 	 */
 	protected void foregroundServeFiles() {
 		/*
 		 * TODO: Crear objeto servidor NFServerSimple y ejecutarlo en primer plano.
 		 */
+		
+		try {
+			NFServerSimple serversimple = new NFServerSimple();
+			serversimple.run();
+		} catch (IOException e) {
+			System.err.println("Excepcion de entrada/salida " + e.getMessage());
+			e.printStackTrace();
+		} 
+		
 		/*
 		 * TODO: Las excepciones que puedan lanzarse deben ser capturadas y tratadas en
 		 * este método. Si se produce una excepción de entrada/salida (error del que no
