@@ -18,10 +18,16 @@ import es.um.redes.nanoFiles.util.FileDigest;
 public class NFConnector {
 	private Socket socket;
 	private InetSocketAddress serverAddr;
-
-
-	//hola me llamo alejandro 
-
+	private DataInputStream dis; 
+	private DataOutputStream dos; 
+	
+	public Socket getSocket() {
+		return this.socket;
+	}
+	public DataInputStream getDis() {
+		return dis;
+	}
+	
 	public NFConnector(InetSocketAddress fserverAddr) throws UnknownHostException, IOException {
 		serverAddr = fserverAddr;
 		/*
@@ -29,13 +35,26 @@ public class NFConnector {
 		 * creación exitosa del socket significa que la conexión TCP ha sido
 		 * establecida.
 		 */
+		
+		socket = new Socket();
+        socket.connect(new InetSocketAddress(serverAddr.getAddress(), serverAddr.getPort()));
+        if(socket.isConnected())
+        	System.out.println("conexion TCP establecida");
+        else 
+        	System.out.println("conexion TCP no establecida");
+		
 		/*
 		 * TODO Se crean los DataInputStream/DataOutputStream a partir de los streams de
 		 * entrada/salida del socket creado. Se usarán para enviar (dos) y recibir (dis)
 		 * datos del servidor.
 		 */
-
-
+        
+        // Crear los DataInputStream y DataOutputStream a partir de los flujos de entrada y salida
+        dis = new DataInputStream(socket.getInputStream());
+        dos = new DataOutputStream(socket.getOutputStream());
+        
+        // Ahora puedes utilizar dataInputStream y dataOutputStream para enviar y recibir datos del servidor
+        
 
 	}
 
@@ -59,6 +78,12 @@ public class NFConnector {
 		 * al servidor a través del "dos" del socket mediante el método
 		 * writeMessageToOutputStream.
 		 */
+		PeerMessage mensaje = new PeerMessage(); 
+		mensaje.setHashCode(targetFileHashSubstr); 
+		
+		
+		
+		
 		/*
 		 * TODO: Recibir mensajes del servidor a través del "dis" del socket usando
 		 * PeerMessage.readMessageFromInputStream, y actuar en función del tipo de
@@ -87,9 +112,9 @@ public class NFConnector {
 		 * subcadena del mismo como parámetro.
 		 */
 
+		
 
-
-
+		downloaded = true; 
 		return downloaded;
 	}
 

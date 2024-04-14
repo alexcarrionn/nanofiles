@@ -23,7 +23,7 @@ public class PeerMessageOps {
 			OPCODE_INVALID_CODE,OPCODE_DOWNLOAD,OPCODE_DOWNLOAD_FROM,OPCODE_DOWNLOAD_FAIL 
 			};
 	private static final String[] _valid_operations_str = {
-			"INVALID_OPCODE","Download", "Downloadfrom", "downloadfail"
+			"INVALID_OPCODE","Download", "Downloadfrom", "Download_fail"
 
 
 

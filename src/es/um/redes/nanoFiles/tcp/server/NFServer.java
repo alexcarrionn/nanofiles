@@ -20,9 +20,9 @@ public class NFServer implements Runnable {
 		/*
 		 * TODO: Crear un socket servidor y ligarlo a cualquier puerto disponible
 		 */
-		InetSocketAddress serverSocketAddress = new InetSocketAddress(SERVERSOCKET_ACCEPT_TIMEOUT_MILISECS); 
+		InetSocketAddress serverSocketAddress = new InetSocketAddress(0); //le ponemos un 0 para que elija el primero disponible
 		serverSocket = new ServerSocket();
-		serverSocket.setSoTimeout(1000);
+		serverSocket.setSoTimeout(SERVERSOCKET_ACCEPT_TIMEOUT_MILISECS);
 		serverSocket.bind(serverSocketAddress);
 		serverSocket.setReuseAddress(true);
 		

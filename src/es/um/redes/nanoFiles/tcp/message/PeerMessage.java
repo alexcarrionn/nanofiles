@@ -15,29 +15,23 @@ import java.nio.ByteBuffer;
 public class PeerMessage {
 
 	private byte opcode;
-	private byte[] para1; 
-	private byte[] para2;
-	
-	private static byte longitudByte; 
-	
+	private byte[] data;
+	private String hashCode;
+	private int longitudByte;
+
 	/*
 	 * TODO: Añadir atributos y crear otros constructores específicos para crear
 	 * mensajes con otros campos (tipos de datos)
 	 * 
 	 */
-	
-
 
 	public PeerMessage() {
 		opcode = PeerMessageOps.OPCODE_INVALID_CODE;
 	}
 
-	public PeerMessage(byte op, byte[] para1, byte[] para2, byte longitud) {
+	public PeerMessage(byte op) {
 		opcode = op;
-		this.para1 = para1;
-		this.para2 = para2; 
-		longitudByte = longitud; 
-		
+		data = null;
 	}
 
 	/*
@@ -45,35 +39,29 @@ public class PeerMessage {
 	 * comprobando previamente que dichos atributos han sido establecidos por el
 	 * constructor (sanity checks)
 	 */
-	
-	
+
 	public byte getOpcode() {
 		return opcode;
 	}
 
-
-	public byte[] getPara1() {
-		return para1;
+	public String getHashCode() {
+		return hashCode;
 	}
 
-	public void setPara1(byte[] para1) {
-		this.para1 = para1;
-	}
-
-	public byte[] getPara2() {
-		return para2;
-	}
-
-	public void setPara2(byte[] para2) {
-		this.para2 = para2;
-	}
-
-	public static byte getLongitudByte() {
+	public int getLongitudByte() {
 		return longitudByte;
 	}
 
-	public static void setLongitudByte(byte longitudByte) {
-		PeerMessage.longitudByte = longitudByte;
+	public void setData(byte[] data) {
+		this.data = data;
+	}
+
+	public void setHashCode(String hashCode) {
+		this.hashCode = hashCode;
+	}
+
+	public void setLongitudByte(int longitudByte) {
+		this.longitudByte = longitudByte;
 	}
 
 	public void setOpcode(byte opcode) {
@@ -99,9 +87,25 @@ public class PeerMessage {
 		 */
 		PeerMessage message = new PeerMessage();
 		byte opcode = dis.readByte();
-		switch (opcode) { 
-		case PeerMessageOps.OPCODE_DOWNLOAD:  
-			//Implementarlo
+		int longitud = dis.readInt();
+		switch (opcode) {
+		case PeerMessageOps.OPCODE_DOWNLOAD_FROM:
+			message.setLongitudByte(longitud);
+			byte[] hash = new byte[message.getLongitudByte()];
+			dis.readFully(hash);
+			message.setHashCode(new String(hash, "UTF-8"));
+			dis.close();
+			break;
+		case PeerMessageOps.OPCODE_DOWNLOAD:
+			message.setLongitudByte(longitud);
+			byte[] hashDownload = new byte[message.getLongitudByte()];
+			dis.readFully(hashDownload);
+			message.setHashCode(new String(hashDownload, "UTF-8"));
+			dis.close();
+			break;
+		case PeerMessageOps.OPCODE_DOWNLOAD_FAIL:
+			System.err.println("Fichero no encontrado");
+			break;
 		default:
 			System.err.println("PeerMessage.readMessageFromInputStream doesn't know how to parse this message opcode: "
 					+ PeerMessageOps.opcodeToOperation(opcode));
@@ -120,18 +124,21 @@ public class PeerMessage {
 
 		dos.writeByte(opcode);
 		switch (opcode) {
-
-
-
-
+		case PeerMessageOps.OPCODE_DOWNLOAD_FROM:
+			dos.writeInt(longitudByte);
+			dos.writeBytes(hashCode);
+			break;
+		case PeerMessageOps.OPCODE_DOWNLOAD:
+			dos.writeInt(longitudByte);
+			dos.write(data);
+			break;
+		case PeerMessageOps.OPCODE_DOWNLOAD_FAIL:
+			System.err.println("Download fail");
+			break;
 		default:
 			System.err.println("PeerMessage.writeMessageToOutputStream found unexpected message opcode " + opcode + "("
 					+ PeerMessageOps.opcodeToOperation(opcode) + ")");
 		}
 	}
-
-
-
-
 
 }
