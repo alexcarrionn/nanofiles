@@ -79,8 +79,9 @@ public class NFConnector {
 		 * writeMessageToOutputStream.
 		 */
 		PeerMessage mensaje = new PeerMessage(); 
-		mensaje.setHashCode(targetFileHashSubstr); 
+		mensaje.setHashCode(targetFileHashSubstr);
 		
+		mensaje.writeMessageToOutputStream(dos); 
 		
 		
 		
