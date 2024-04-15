@@ -33,110 +33,60 @@ public class NFConnector {
 	}
 	
 	public NFConnector(InetSocketAddress fserverAddr) throws UnknownHostException, IOException {
-		serverAddr = fserverAddr;
-		/*
-		 * TODO Se crea el socket a partir de la dirección del servidor (IP, puerto). La
-		 * creación exitosa del socket significa que la conexión TCP ha sido
-		 * establecida.
-		 */
-		
-		socket = new Socket();
-        socket.connect(new InetSocketAddress(serverAddr.getAddress(), serverAddr.getPort()));
-        if(socket.isConnected())
-        	System.out.println("conexion TCP establecida");
-        else 
-        	System.out.println("conexion TCP no establecida");
-		
-		/*
-		 * TODO Se crean los DataInputStream/DataOutputStream a partir de los streams de
-		 * entrada/salida del socket creado. Se usarán para enviar (dos) y recibir (dis)
-		 * datos del servidor.
-		 */
-        
-        // Crear los DataInputStream y DataOutputStream a partir de los flujos de entrada y salida
-        dis = new DataInputStream(socket.getInputStream());
-        dos = new DataOutputStream(socket.getOutputStream());
-        
-        // Ahora puedes utilizar dataInputStream y dataOutputStream para enviar y recibir datos del servidor
-        
-
+	    serverAddr = fserverAddr;
+	    try {
+	        socket = new Socket();
+	        socket.connect(new InetSocketAddress(serverAddr.getAddress(), serverAddr.getPort()));
+	        if (socket.isConnected()) {
+	            System.out.println("Conexión TCP establecida.");
+	            dis = new DataInputStream(socket.getInputStream());
+	            dos = new DataOutputStream(socket.getOutputStream());
+	        } else {
+	            throw new IOException("No se pudo establecer la conexión TCP.");
+	        }
+	    } catch (IOException e) {
+	        System.err.println("Error al conectar con el servidor: " + e.getMessage());
+	        throw e;
+	    }
 	}
 
-	/**
-	 * Método para descargar un fichero a través del socket mediante el que estamos
-	 * conectados con un peer servidor.
-	 * 
-	 * @param targetFileHashSubstr Subcadena del hash del fichero a descargar
-	 * @param file                 El objeto File que referencia el nuevo fichero
-	 *                             creado en el cual se escribirán los datos
-	 *                             descargados del servidor
-	 * @return Verdadero si la descarga se completa con éxito, falso en caso
-	 *         contrario.
-	 * @throws IOException Si se produce algún error al leer/escribir del socket.
-	 */
-	
-	
 	public boolean downloadFile(String targetFileHashSubstr, File file) throws IOException {
-		boolean downloaded = false;
-		/*
-		 * TODO: Construir objetos PeerMessage que modelen mensajes con los valores
-		 * adecuados en sus campos (atributos), según el protocolo diseñado, y enviarlos
-		 * al servidor a través del "dos" del socket mediante el método
-		 * writeMessageToOutputStream.
-		 */
-		PeerMessage msgToServer = new PeerMessage(PeerMessageOps.OPCODE_DOWNLOAD_FROM);
-		msgToServer.setHashCode(targetFileHashSubstr);
-		msgToServer.setLongitudByte((int) targetFileHashSubstr.length());
-		msgToServer.writeMessageToOutputStream(dos);
-		/*
-		 * TODO: Recibir mensajes del servidor a través del "dis" del socket usando
-		 * PeerMessage.readMessageFromInputStream, y actuar en función del tipo de
-		 * mensaje recibido, extrayendo los valores necesarios de los atributos del
-		 * objeto (valores de los campos del mensaje).
-		 */
+	    boolean downloaded = false;
+	    try {
+	        // Envía mensaje al servidor para solicitar la descarga del archivo
+	        PeerMessage msgToServer = new PeerMessage(PeerMessageOps.OPCODE_DOWNLOAD_FROM);
+	        msgToServer.setHashCode(targetFileHashSubstr);
+	        msgToServer.setLongitudByte((int) targetFileHashSubstr.length());
+	        msgToServer.writeMessageToOutputStream(dos);
 
-		PeerMessage msgFromServer = PeerMessage.readMessageFromInputStream(dis);
-		if (msgFromServer.getOpcode() == PeerMessageOps.OPCODE_DOWNLOAD) {
-			FileOutputStream fos = new FileOutputStream(file);
-			fos.write(msgFromServer.getData());
-			fos.close();
+	        // Recibe respuesta del servidor
+	        PeerMessage msgFromServer = PeerMessage.readMessageFromInputStream(dis);
 
-			/*
-			 * TODO: Para escribir datos de un fichero recibidos en un mensaje, se puede
-			 * crear un FileOutputStream a partir del parámetro "file" para escribir cada
-			 * fragmento recibido (array de bytes) en el fichero mediante el método "write".
-			 * Cerrar el FileOutputStream una vez se han escrito todos los fragmentos.
-			 */
+	        // Verifica si la respuesta indica que se ha iniciado la descarga
+	        if (msgFromServer.getOpcode() == PeerMessageOps.OPCODE_DOWNLOAD) {
+	            try (FileOutputStream fos = new FileOutputStream(file)) {
+	                fos.write(msgFromServer.getData());
+	                downloaded = true;
+	            } catch (IOException e) {
+	                System.err.println("Error al escribir en el archivo: " + e.getMessage());
+	                throw e;
+	            }
 
-			/*
-			 * NOTA: Hay que tener en cuenta que puede que la subcadena del hash pasada como
-			 * parámetro no identifique unívocamente ningún fichero disponible en el
-			 * servidor (porque no concuerde o porque haya más de un fichero coincidente con
-			 * dicha subcadena)
-			 */
-			
+	            // Verifica la integridad del archivo descargado
+	            String newHash = FileDigest.computeFileChecksumString(file.getAbsolutePath());
+	            if (!newHash.contains(targetFileHashSubstr)) {
+	                System.err.println("El archivo descargado está corrupto.");
+	                downloaded = false;
+	            }
+	        } else {
+	            System.err.println("El servidor no ha iniciado la descarga del archivo.");
+	            downloaded = false;
+	        }
+	    } catch (IOException e) {
+	        System.err.println("Error durante la descarga del archivo: " + e.getMessage());
+	        throw e;
+	    }
 
-		/*
-		 * TODO: Finalmente, comprobar la integridad del fichero creado para comprobar
-		 * que es idéntico al original, calculando el hash a partir de su contenido con
-		 * FileDigest.computeFileChecksumString y comparándolo con el hash completo del
-		 * fichero solicitado. Para ello, es necesario obtener del servidor el hash
-		 * completo del fichero descargado, ya que quizás únicamente obtuvimos una
-		 * subcadena del mismo como parámetro.
-		 */
-			
-			String newHash = FileDigest.computeFileChecksumString(file.getAbsolutePath());
-			if (newHash.contains(targetFileHashSubstr)){
-				downloaded=true;
-			}else {downloaded=false;}
-
-			
-		//Este else va con el if msgFromServer.getOpcode() == PeerMessageOps.OPCODE_DOWNLOAD_OK
-		} else {
-			downloaded = false;
-		}
-		
-
-		return downloaded;
+	    return downloaded;
 	}
 }
