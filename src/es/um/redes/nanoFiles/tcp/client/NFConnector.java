@@ -78,8 +78,11 @@ public class NFConnector {
 		 * al servidor a través del "dos" del socket mediante el método
 		 * writeMessageToOutputStream.
 		 */
-		PeerMessage mensaje = new PeerMessage(); 
+		PeerMessage mensaje = new PeerMessage();
+		//poner los campos
 		mensaje.setHashCode(targetFileHashSubstr);
+		 
+		
 		
 		mensaje.writeMessageToOutputStream(dos); 
 		
@@ -91,6 +94,9 @@ public class NFConnector {
 		 * mensaje recibido, extrayendo los valores necesarios de los atributos del
 		 * objeto (valores de los campos del mensaje).
 		 */
+		
+		PeerMessage.readMessageFromInputStream(dis); 
+		
 		/*
 		 * TODO: Para escribir datos de un fichero recibidos en un mensaje, se puede
 		 * crear un FileOutputStream a partir del parámetro "file" para escribir cada
