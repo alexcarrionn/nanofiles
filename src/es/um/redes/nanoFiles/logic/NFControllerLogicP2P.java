@@ -5,9 +5,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.net.InetSocketAddress;
+import java.net.UnknownHostException;
 import java.util.LinkedList;
 import java.util.Random;
 
+import es.um.redes.nanoFiles.tcp.client.NFConnector;
 import es.um.redes.nanoFiles.tcp.server.NFServerSimple;
 
 
@@ -87,9 +89,11 @@ public class NFControllerLogicP2P {
 	 * @param fserverAddr    La dirección del servidor al que se conectará
 	 * @param targetFileHash El hash del fichero a descargar
 	 * @param localFileName  El nombre con el que se guardará el fichero descargado
+	 * @throws IOException 
+	 * @throws UnknownHostException 
 	 */
 	protected boolean downloadFileFromSingleServer(InetSocketAddress fserverAddr, String targetFileHash,
-			String localFileName) {
+			String localFileName) throws UnknownHostException, IOException {
 		boolean result = false;
 		if (fserverAddr == null) {
 			System.err.println("* Cannot start download - No server address provided");
@@ -103,6 +107,17 @@ public class NFControllerLogicP2P {
 		 * descarga. Si todo va bien, imprimir mensaje informando de que se ha
 		 * completado la descarga.
 		 */
+		 NFConnector conector = new NFConnector(fserverAddr); 
+		 String folderPath = "nf-shared"; 
+		 File descarga = new File(folderPath,localFileName); 
+		
+		 
+		 if(!descarga.exists()) {
+			 descarga.createNewFile(); 
+			 result = conector.downloadFile(targetFileHash, descarga); 
+		 }else {
+			 System.err.println("File name: "+ localFileName + " is used");
+		 }
 		/*
 		 * TODO: Las excepciones que puedan lanzarse deben ser capturadas y tratadas en
 		 * este método. Si se produce una excepción de entrada/salida (error del que no

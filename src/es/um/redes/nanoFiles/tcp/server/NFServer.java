@@ -39,6 +39,7 @@ public class NFServer implements Runnable {
 		 * TODO: Usar el socket servidor para esperar conexiones de otros peers que
 		 * soliciten descargar ficheros
 		 */
+		
 		/*
 		 * TODO: Al establecerse la conexión con un peer, la comunicación con dicho
 		 * cliente se hace en el método NFServerComm.serveFilesToClient(socket), al cual

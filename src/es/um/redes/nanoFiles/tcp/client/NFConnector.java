@@ -28,6 +28,10 @@ public class NFConnector {
 		return dis;
 	}
 	
+	public InetSocketAddress getServerAddr() {
+		return serverAddr;
+	}
+	
 	public NFConnector(InetSocketAddress fserverAddr) throws UnknownHostException, IOException {
 		serverAddr = fserverAddr;
 		/*
@@ -70,6 +74,8 @@ public class NFConnector {
 	 *         contrario.
 	 * @throws IOException Si se produce algún error al leer/escribir del socket.
 	 */
+	
+	
 	public boolean downloadFile(String targetFileHashSubstr, File file) throws IOException {
 		boolean downloaded = false;
 		/*
@@ -78,37 +84,37 @@ public class NFConnector {
 		 * al servidor a través del "dos" del socket mediante el método
 		 * writeMessageToOutputStream.
 		 */
-		PeerMessage mensaje = new PeerMessage();
-		//poner los campos
-		mensaje.setHashCode(targetFileHashSubstr);
-		 
-		
-		
-		mensaje.writeMessageToOutputStream(dos); 
-		
-		
-		
+		PeerMessage msgToServer = new PeerMessage(PeerMessageOps.OPCODE_DOWNLOAD_FROM);
+		msgToServer.setHashCode(targetFileHashSubstr);
+		msgToServer.setLongitudByte((int) targetFileHashSubstr.length());
+		msgToServer.writeMessageToOutputStream(dos);
 		/*
 		 * TODO: Recibir mensajes del servidor a través del "dis" del socket usando
 		 * PeerMessage.readMessageFromInputStream, y actuar en función del tipo de
 		 * mensaje recibido, extrayendo los valores necesarios de los atributos del
 		 * objeto (valores de los campos del mensaje).
 		 */
-		
-		PeerMessage.readMessageFromInputStream(dis); 
-		
-		/*
-		 * TODO: Para escribir datos de un fichero recibidos en un mensaje, se puede
-		 * crear un FileOutputStream a partir del parámetro "file" para escribir cada
-		 * fragmento recibido (array de bytes) en el fichero mediante el método "write".
-		 * Cerrar el FileOutputStream una vez se han escrito todos los fragmentos.
-		 */
-		/*
-		 * NOTA: Hay que tener en cuenta que puede que la subcadena del hash pasada como
-		 * parámetro no identifique unívocamente ningún fichero disponible en el
-		 * servidor (porque no concuerde o porque haya más de un fichero coincidente con
-		 * dicha subcadena)
-		 */
+
+		PeerMessage msgFromServer = PeerMessage.readMessageFromInputStream(dis);
+		if (msgFromServer.getOpcode() == PeerMessageOps.OPCODE_DOWNLOAD) {
+			FileOutputStream fos = new FileOutputStream(file);
+			fos.write(msgFromServer.getData());
+			fos.close();
+
+			/*
+			 * TODO: Para escribir datos de un fichero recibidos en un mensaje, se puede
+			 * crear un FileOutputStream a partir del parámetro "file" para escribir cada
+			 * fragmento recibido (array de bytes) en el fichero mediante el método "write".
+			 * Cerrar el FileOutputStream una vez se han escrito todos los fragmentos.
+			 */
+
+			/*
+			 * NOTA: Hay que tener en cuenta que puede que la subcadena del hash pasada como
+			 * parámetro no identifique unívocamente ningún fichero disponible en el
+			 * servidor (porque no concuerde o porque haya más de un fichero coincidente con
+			 * dicha subcadena)
+			 */
+			
 
 		/*
 		 * TODO: Finalmente, comprobar la integridad del fichero creado para comprobar
@@ -118,19 +124,19 @@ public class NFConnector {
 		 * completo del fichero descargado, ya que quizás únicamente obtuvimos una
 		 * subcadena del mismo como parámetro.
 		 */
+			
+			String newHash = FileDigest.computeFileChecksumString(file.getAbsolutePath());
+			if (newHash.contains(targetFileHashSubstr)){
+				downloaded=true;
+			}else {downloaded=false;}
 
+			
+		//Este else va con el if msgFromServer.getOpcode() == PeerMessageOps.OPCODE_DOWNLOAD_OK
+		} else {
+			downloaded = false;
+		}
 		
 
-		downloaded = true; 
 		return downloaded;
 	}
-
-
-
-
-
-	public InetSocketAddress getServerAddr() {
-		return serverAddr;
-	}
-
 }

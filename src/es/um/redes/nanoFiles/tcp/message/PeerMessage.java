@@ -40,8 +40,13 @@ public class PeerMessage {
 	 * constructor (sanity checks)
 	 */
 
+	
 	public byte getOpcode() {
 		return opcode;
+	}
+
+	public byte[] getData() {
+		return data;
 	}
 
 	public String getHashCode() {
