@@ -188,6 +188,8 @@ public class NFController {
 			 * al comando) y lo guarde con el nombre indicado en downloadLocalFileName (3er
 			 * argumento)
 			 */
+			
+			//el error esta aqui ya que en NFConector 
 			InetSocketAddress serverAddr = controllerDir.getServerAddress(downloadTargetServer);
 			commandSucceeded = controllerPeer.downloadFileFromSingleServer(serverAddr, downloadTargetFileHash,
 					downloadLocalFileName);

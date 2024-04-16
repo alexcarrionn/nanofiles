@@ -253,10 +253,11 @@ public class DirMessage {
 		case DirMessageOps.OPERATION_LOGIN_OUT: {
 			if(nickname != null) {
 				sb.append(FIELDNAME_NICKNAME + DELIMITER + nickname + END_LINE); 
-			}else
+			}else {
 				sb.append(FIELDNAME_LOGING_OUT + DELIMITER + logout + END_LINE);
 			}
-			break;
+			break;}
+			
 			
 		}
 	    sb.append(END_LINE); // Marcamos el final del mensaje
