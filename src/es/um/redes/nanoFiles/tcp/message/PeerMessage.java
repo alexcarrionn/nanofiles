@@ -29,11 +29,7 @@ public class PeerMessage {
 		opcode = PeerMessageOps.OPCODE_INVALID_CODE;
 	}
 
-	public PeerMessage(byte op, String hash, int longitud) {
-		opcode = op;
-		hashCode = hash; 
-		longitudByte = longitud; 
-	}
+	
 	public PeerMessage(byte op) {
 		opcode = op; 
 	}
