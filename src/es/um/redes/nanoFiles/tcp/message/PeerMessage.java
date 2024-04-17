@@ -15,7 +15,7 @@ import java.nio.ByteBuffer;
 public class PeerMessage {
 
 	private byte opcode;
-	private byte[] data;
+	private byte[] data = null;
 	private String hashCode;
 	private int longitudByte;
 
@@ -29,9 +29,13 @@ public class PeerMessage {
 		opcode = PeerMessageOps.OPCODE_INVALID_CODE;
 	}
 
-	public PeerMessage(byte op) {
+	public PeerMessage(byte op, String hash, int longitud) {
 		opcode = op;
-		data = null;
+		hashCode = hash; 
+		longitudByte = longitud; 
+	}
+	public PeerMessage(byte op) {
+		opcode = op; 
 	}
 
 	/*
@@ -90,8 +94,9 @@ public class PeerMessage {
 		 * será devuelto como resultado. NOTA: Usar dis.readFully para leer un array de
 		 * bytes, dis.readInt para leer un entero, etc.
 		 */
-		PeerMessage message = new PeerMessage();
+		
 		byte opcode = dis.readByte();
+		PeerMessage message = new PeerMessage(opcode);
 		int longitud = dis.readInt();
 		switch (opcode) {
 		case PeerMessageOps.OPCODE_DOWNLOAD_FROM:
@@ -99,14 +104,13 @@ public class PeerMessage {
 			byte[] hash = new byte[message.getLongitudByte()];
 			dis.readFully(hash);
 			message.setHashCode(new String(hash, "UTF-8"));
-			dis.close();
+			//dis.close();
 			break;
-		case PeerMessageOps.OPCODE_DOWNLOAD:
-			message.setLongitudByte(longitud);
-			byte[] hashDownload = new byte[message.getLongitudByte()];
-			dis.readFully(hashDownload);
-			message.setHashCode(new String(hashDownload, "UTF-8"));
-			dis.close();
+		case PeerMessageOps.OPCODE_DOWNLOAD_OK:
+			message.setLongitudByte(dis.readByte());
+			byte[] file= new byte[dis.readByte()];
+			dis.readFully(file);
+			//dis.close();
 			break;
 		case PeerMessageOps.OPCODE_DOWNLOAD_FAIL:
 			System.err.println("Fichero no encontrado");
@@ -130,11 +134,11 @@ public class PeerMessage {
 		dos.writeByte(opcode);
 		switch (opcode) {
 		case PeerMessageOps.OPCODE_DOWNLOAD_FROM:
-			dos.writeInt(longitudByte);
-			dos.writeBytes(hashCode);
+			dos.writeInt(hashCode.getBytes().length);
+			dos.write(hashCode.getBytes());
 			break;
-		case PeerMessageOps.OPCODE_DOWNLOAD:
-			dos.writeInt(longitudByte);
+		case PeerMessageOps.OPCODE_DOWNLOAD_OK:
+			dos.writeInt(data.length);
 			dos.write(data);
 			break;
 		case PeerMessageOps.OPCODE_DOWNLOAD_FAIL:

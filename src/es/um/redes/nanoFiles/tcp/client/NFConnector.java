@@ -33,10 +33,9 @@ public class NFConnector {
 	}
 	
 	public NFConnector(InetSocketAddress fserverAddr) throws UnknownHostException, IOException {
-	    serverAddr = fserverAddr;
-	    try {
-	        socket = new Socket();
-	        socket.connect(new InetSocketAddress(serverAddr.getAddress(), serverAddr.getPort()));
+			serverAddr = fserverAddr;
+	        socket = new Socket(serverAddr.getAddress(),serverAddr.getPort());
+	        //socket.connect(new InetSocketAddress(serverAddr.getAddress(), serverAddr.getPort()));
 	        if (socket.isConnected()) {
 	            System.out.println("Conexión TCP establecida.");
 	            dis = new DataInputStream(socket.getInputStream());
@@ -44,10 +43,6 @@ public class NFConnector {
 	        } else {
 	            throw new IOException("No se pudo establecer la conexión TCP.");
 	        }
-	    } catch (IOException e) {
-	        System.err.println("Error al conectar con el servidor: " + e.getMessage());
-	        throw e;
-	    }
 	}
 
 	public boolean downloadFile(String targetFileHashSubstr, File file) throws IOException {
@@ -56,15 +51,18 @@ public class NFConnector {
 	        // Envía mensaje al servidor para solicitar la descarga del archivo
 	        PeerMessage msgToServer = new PeerMessage(PeerMessageOps.OPCODE_DOWNLOAD_FROM);
 	        msgToServer.setHashCode(targetFileHashSubstr);
-	        msgToServer.setLongitudByte((int) targetFileHashSubstr.length());
+	        msgToServer.setLongitudByte(targetFileHashSubstr.getBytes().length);
+
 	        msgToServer.writeMessageToOutputStream(dos);
 
 	        // Recibe respuesta del servidor
+	          
 	        PeerMessage msgFromServer = PeerMessage.readMessageFromInputStream(dis);
 
 	        // Verifica si la respuesta indica que se ha iniciado la descarga
-	        if (msgFromServer.getOpcode() == PeerMessageOps.OPCODE_DOWNLOAD) {
+	        if (msgFromServer.getOpcode() == PeerMessageOps.OPCODE_DOWNLOAD_OK) {
 	            try (FileOutputStream fos = new FileOutputStream(file)) {
+	            	//aqui data es null y da error
 	                fos.write(msgFromServer.getData());
 	                downloaded = true;
 	            } catch (IOException e) {

@@ -22,7 +22,7 @@ public class NFServerSimple {
 	    while (!success) {
 	        try {
 	            InetSocketAddress socketAddress = new InetSocketAddress(port);
-	            serverSocket = new ServerSocket();
+	            serverSocket = new ServerSocket(); 
 	            serverSocket.bind(socketAddress);
 	            // Si llega aqui sin que salte excepcion significa que ha creado con exito el
 	            // servidor
