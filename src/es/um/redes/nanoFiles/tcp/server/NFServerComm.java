@@ -42,7 +42,7 @@ public class NFServerComm {
 					FileInfo[] ficherosEncontrados = FileInfo.lookupHashSubstring(ficheros, subHashcode);
 				    
 					if (ficherosEncontrados.length != 1) {
-						System.err.println("Mas de un fichero encontrado con el fragmento de hash "+subHashcode);
+						System.err.println("Mas de un fichero encontrado con el fragmento de hash "+ subHashcode);
 					}else {
 						FileInfo file = ficherosEncontrados[0];
 						String hash= file.fileHash;

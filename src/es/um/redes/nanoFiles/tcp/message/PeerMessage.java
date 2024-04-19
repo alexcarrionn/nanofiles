@@ -16,8 +16,8 @@ public class PeerMessage {
 
 	private byte opcode;
 	private byte[] data = null;
-	private String hashCode;
-	private int longitudByte;
+	private String hashCode = "";
+	private int longitudByte = 0;
 
 	/*
 	 * TODO: Añadir atributos y crear otros constructores específicos para crear
@@ -100,13 +100,13 @@ public class PeerMessage {
 			byte[] hash = new byte[message.getLongitudByte()];
 			dis.readFully(hash);
 			message.setHashCode(new String(hash, "UTF-8"));
-			//dis.close();
+			dis.close();
 			break;
 		case PeerMessageOps.OPCODE_DOWNLOAD_OK:
 			message.setLongitudByte(dis.readByte());
 			byte[] file= new byte[dis.readByte()];
 			dis.readFully(file);
-			//dis.close();
+			dis.close();
 			break;
 		case PeerMessageOps.OPCODE_DOWNLOAD_FAIL:
 			System.err.println("Fichero no encontrado");

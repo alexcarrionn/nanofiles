@@ -52,7 +52,6 @@ public class NFConnector {
 	        PeerMessage msgToServer = new PeerMessage(PeerMessageOps.OPCODE_DOWNLOAD_FROM);
 	        msgToServer.setHashCode(targetFileHashSubstr);
 	        msgToServer.setLongitudByte(targetFileHashSubstr.getBytes().length);
-
 	        msgToServer.writeMessageToOutputStream(dos);
 
 	        // Recibe respuesta del servidor
@@ -62,8 +61,10 @@ public class NFConnector {
 	        if (msgFromServer.getOpcode() == PeerMessageOps.OPCODE_DOWNLOAD_OK) {
 	            try (FileOutputStream fos = new FileOutputStream(file)) {
 	            	//aqui data es null y da error
-	                fos.write(msgFromServer.getData());
+	            	byte[] data = msgFromServer.getData(); 
+	                fos.write(data);
 	                downloaded = true;
+	                fos.close();
 	            } catch (IOException e) {
 	                System.err.println("Error al escribir en el archivo: " + e.getMessage());
 	                throw e;
