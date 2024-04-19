@@ -56,7 +56,6 @@ public class NFConnector {
 	        msgToServer.writeMessageToOutputStream(dos);
 
 	        // Recibe respuesta del servidor
-	          
 	        PeerMessage msgFromServer = PeerMessage.readMessageFromInputStream(dis);
 
 	        // Verifica si la respuesta indica que se ha iniciado la descarga

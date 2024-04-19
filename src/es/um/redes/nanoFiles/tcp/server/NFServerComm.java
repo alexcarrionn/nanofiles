@@ -57,8 +57,11 @@ public class NFServerComm {
 							mensajeEnviar.setLongitudByte(archivodata.length);
 							mensajeEnviar.setData(archivodata);
 							mensajeEnviar.writeMessageToOutputStream(dos);
+							
 						}
 					}
+					dis.close();
+					dos.close();
 				break;
 				}
 				default:
