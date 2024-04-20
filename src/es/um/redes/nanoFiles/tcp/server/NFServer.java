@@ -39,12 +39,21 @@ public class NFServer implements Runnable {
 		 * TODO: Usar el socket servidor para esperar conexiones de otros peers que
 		 * soliciten descargar ficheros
 		 */
-		
 		/*
 		 * TODO: Al establecerse la conexión con un peer, la comunicación con dicho
 		 * cliente se hace en el método NFServerComm.serveFilesToClient(socket), al cual
 		 * hay que pasarle el socket devuelto por accept
 		 */
+		Socket socket = null; 
+		while(true) {
+			try {
+				socket = serverSocket.accept();
+				System.out.println("New client in the port : " + socket.getPort());
+				NFServerComm.serveFilesToClient(socket);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} 
 		/*
 		 * TODO: (Opcional) Crear un hilo nuevo de la clase NFServerThread, que llevará
 		 * a cabo la comunicación con el cliente que se acaba de conectar, mientras este
@@ -55,7 +64,7 @@ public class NFServer implements Runnable {
 		 */
 
 
-
+		}
 	}
 	/**
 	 * TODO: Añadir métodos a esta clase para: 1) Arrancar el servidor en un hilo

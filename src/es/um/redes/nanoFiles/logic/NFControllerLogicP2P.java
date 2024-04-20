@@ -89,42 +89,32 @@ public class NFControllerLogicP2P {
 	 * @throws UnknownHostException 
 	 */
 	protected boolean downloadFileFromSingleServer(InetSocketAddress fserverAddr, String targetFileHash,
-			String localFileName) throws UnknownHostException, IOException {
-		boolean result = false;
-		if (fserverAddr == null) {
-			System.err.println("* Cannot start download - No server address provided");
-			return false;
-		}
-		/*
-		 * TODO: Crear un objeto NFConnector para establecer la conexión con el peer
-		 * servidor de ficheros, y usarlo para descargar el fichero mediante su método
-		 * "downloadFile". Se debe comprobar previamente si ya existe un fichero con el
-		 * mismo nombre en esta máquina, en cuyo caso se informa y no se realiza la
-		 * descarga. Si todo va bien, imprimir mensaje informando de que se ha
-		 * completado la descarga.
-		 */
-		  
-		 String folderPath = "nf-shared"; 
-		 File descarga = new File(folderPath,localFileName); 
-		
-		 
-		 if(!descarga.exists()) {
-			 NFConnector conector = new NFConnector(fserverAddr);
-			 descarga.createNewFile(); 
-			 result = conector.downloadFile(targetFileHash, descarga); 
-		 }else {
-			 System.err.println("File name: "+ localFileName + " is used");
-		 }
-		/*
-		 * TODO: Las excepciones que puedan lanzarse deben ser capturadas y tratadas en
-		 * este método. Si se produce una excepción de entrada/salida (error del que no
-		 * es posible recuperarse), se debe informar sin abortar el programa
-		 */
+	        String localFileName) throws UnknownHostException, IOException {
+	    boolean result = false;
+	    if (fserverAddr == null) {
+	        System.err.println("* Cannot start download - No server address provided");
+	        return false;
+	    }
+	    String folderPath = "nf-shared";
+	    File downloadFile = new File(folderPath, localFileName);
 
+	    // Verificar si ya existe un archivo con el mismo nombre
+	    if (downloadFile.exists()) {
+	        System.err.println("* File with the same name already exists: " + localFileName);
+	        return false;
+	    }
 
-
-		return result;
+	    NFConnector connector = new NFConnector(fserverAddr);
+	        // Intentar descargar el archivo
+	        if (connector.downloadFile(targetFileHash, downloadFile)) {
+	            result = true;
+	            System.out.println("File downloaded successfully: " + localFileName);
+	        } else {
+	            System.err.println("* Failed to download file: " + localFileName);
+	        }
+	    return result;
 	}
+
 
 	/**
 	 * Método para descargar un fichero del peer servidor de ficheros

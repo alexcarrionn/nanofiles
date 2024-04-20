@@ -93,20 +93,20 @@ public class PeerMessage {
 		
 		byte opcode = dis.readByte();
 		PeerMessage message = new PeerMessage(opcode);
-		int longitud = dis.readInt();
+		
 		switch (opcode) {
 		case PeerMessageOps.OPCODE_DOWNLOAD_FROM:
+			int longitud = dis.readInt();
 			message.setLongitudByte(longitud);
 			byte[] hash = new byte[message.getLongitudByte()];
 			dis.readFully(hash);
 			message.setHashCode(new String(hash, "UTF-8"));
-			dis.close();
 			break;
 		case PeerMessageOps.OPCODE_DOWNLOAD_OK:
 			message.setLongitudByte(dis.readByte());
 			byte[] file= new byte[dis.readByte()];
 			dis.readFully(file);
-			dis.close();
+			message.setData(file); 
 			break;
 		case PeerMessageOps.OPCODE_DOWNLOAD_FAIL:
 			System.err.println("Fichero no encontrado");
@@ -134,7 +134,7 @@ public class PeerMessage {
 			dos.writeBytes(hashCode);
 			break;
 		case PeerMessageOps.OPCODE_DOWNLOAD_OK:
-			dos.writeInt(data.length);
+			dos.writeInt(longitudByte);
 			dos.write(data);
 			break;
 		case PeerMessageOps.OPCODE_DOWNLOAD_FAIL:

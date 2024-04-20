@@ -51,23 +51,28 @@ public class NFConnector {
 	        // Envía mensaje al servidor para solicitar la descarga del archivo
 	        PeerMessage msgToServer = new PeerMessage(PeerMessageOps.OPCODE_DOWNLOAD_FROM);
 	        msgToServer.setHashCode(targetFileHashSubstr);
-	        msgToServer.setLongitudByte(targetFileHashSubstr.getBytes().length);
+	        msgToServer.setLongitudByte((int)targetFileHashSubstr.getBytes().length);
 	        msgToServer.writeMessageToOutputStream(dos);
 
 	        // Recibe respuesta del servidor
 	        PeerMessage msgFromServer = PeerMessage.readMessageFromInputStream(dis);
-
+	        
 	        // Verifica si la respuesta indica que se ha iniciado la descarga
 	        if (msgFromServer.getOpcode() == PeerMessageOps.OPCODE_DOWNLOAD_OK) {
 	            FileOutputStream fos = new FileOutputStream(file);
 	            	//aqui data es null y da error
-	            	byte[] data = msgFromServer.getData(); 
+	            if (msgFromServer.getData() != null) {
+	                byte[] data = msgFromServer.getData();
 	                fos.write(data);
-	                downloaded = true;
 	                fos.close();
+	                downloaded = true;
+	            } else {
+	                System.err.println("El mensaje del servidor no contiene datos para descargar.");
+	                downloaded = false;
+	            }
 	            // Verifica la integridad del archivo descargado
 	            String newHash = FileDigest.computeFileChecksumString(file.getAbsolutePath());
-	            if (!newHash.contains(targetFileHashSubstr)) {
+	            if (newHash.contains(targetFileHashSubstr)) {
 	                System.err.println("El archivo descargado está corrupto.");
 	                downloaded = false;
 	            }
