@@ -59,17 +59,12 @@ public class NFConnector {
 
 	        // Verifica si la respuesta indica que se ha iniciado la descarga
 	        if (msgFromServer.getOpcode() == PeerMessageOps.OPCODE_DOWNLOAD_OK) {
-	            try (FileOutputStream fos = new FileOutputStream(file)) {
+	            FileOutputStream fos = new FileOutputStream(file);
 	            	//aqui data es null y da error
 	            	byte[] data = msgFromServer.getData(); 
 	                fos.write(data);
 	                downloaded = true;
 	                fos.close();
-	            } catch (IOException e) {
-	                System.err.println("Error al escribir en el archivo: " + e.getMessage());
-	                throw e;
-	            }
-
 	            // Verifica la integridad del archivo descargado
 	            String newHash = FileDigest.computeFileChecksumString(file.getAbsolutePath());
 	            if (!newHash.contains(targetFileHashSubstr)) {

@@ -131,7 +131,7 @@ public class PeerMessage {
 		switch (opcode) {
 		case PeerMessageOps.OPCODE_DOWNLOAD_FROM:
 			dos.writeInt(hashCode.getBytes().length);
-			dos.write(hashCode.getBytes());
+			dos.writeBytes(hashCode);
 			break;
 		case PeerMessageOps.OPCODE_DOWNLOAD_OK:
 			dos.writeInt(data.length);

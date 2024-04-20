@@ -12,10 +12,6 @@ import java.util.Random;
 import es.um.redes.nanoFiles.tcp.client.NFConnector;
 import es.um.redes.nanoFiles.tcp.server.NFServerSimple;
 
-
-
-
-
 public class NFControllerLogicP2P {
 	/*
 	 * TODO: Para bgserve, se necesita un atributo NFServer que actuará como
@@ -107,12 +103,13 @@ public class NFControllerLogicP2P {
 		 * descarga. Si todo va bien, imprimir mensaje informando de que se ha
 		 * completado la descarga.
 		 */
-		 NFConnector conector = new NFConnector(fserverAddr); 
+		  
 		 String folderPath = "nf-shared"; 
 		 File descarga = new File(folderPath,localFileName); 
 		
 		 
 		 if(!descarga.exists()) {
+			 NFConnector conector = new NFConnector(fserverAddr);
 			 descarga.createNewFile(); 
 			 result = conector.downloadFile(targetFileHash, descarga); 
 		 }else {
