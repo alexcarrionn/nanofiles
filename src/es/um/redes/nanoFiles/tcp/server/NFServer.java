@@ -15,15 +15,17 @@ public class NFServer implements Runnable {
 	private ServerSocket serverSocket = null;
 	private boolean stopServer = false;
 	private static final int SERVERSOCKET_ACCEPT_TIMEOUT_MILISECS = 1000;
+	
+	
 
 	public NFServer() throws IOException {
 		/*
 		 * TODO: Crear un socket servidor y ligarlo a cualquier puerto disponible
 		 */
-		InetSocketAddress serverSocketAddress = new InetSocketAddress(0); //le ponemos un 0 para que elija el primero disponible
+		InetSocketAddress serverSocketAddress = new InetSocketAddress(10000); //le ponemos un 0 para que elija el primero disponible
 		serverSocket = new ServerSocket();
-		serverSocket.setSoTimeout(SERVERSOCKET_ACCEPT_TIMEOUT_MILISECS);
 		serverSocket.bind(serverSocketAddress);
+		//serverSocket.setSoTimeout(SERVERSOCKET_ACCEPT_TIMEOUT_MILISECS);
 		serverSocket.setReuseAddress(true);
 		
 	}

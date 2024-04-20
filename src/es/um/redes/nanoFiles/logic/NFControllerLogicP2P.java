@@ -10,6 +10,7 @@ import java.util.LinkedList;
 import java.util.Random;
 
 import es.um.redes.nanoFiles.tcp.client.NFConnector;
+import es.um.redes.nanoFiles.tcp.server.NFServer;
 import es.um.redes.nanoFiles.tcp.server.NFServerSimple;
 
 public class NFControllerLogicP2P {
@@ -37,6 +38,8 @@ public class NFControllerLogicP2P {
 		try {
 			NFServerSimple serversimple = new NFServerSimple();
 			serversimple.run();
+			/*NFServer server = new NFServer(); 
+			server.run();*/
 		} catch (IOException e) {
 			System.err.println("Excepcion de entrada/salida " + e.getMessage());
 			e.printStackTrace();
