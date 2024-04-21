@@ -54,7 +54,7 @@ public class NFServerSimple {
 				/*
 				 * TODO: Comprobar que el socket servidor está creado y ligado
 				 */
-				System.out.println("Comprobación de que el socket esta creado y ligado: "
+				System.out.println("Servidor en el puerto : "
 						+ serverSocket.getLocalPort());
 				/*
 				 * TODO: Usar el socket servidor para esperar conexiones de otros peers que
@@ -69,8 +69,6 @@ public class NFServerSimple {
 				System.out.println(
 						"\nNew client connected: " + socket.getInetAddress().toString() + ":" + socket.getPort());
 				NFServerComm.serveFilesToClient(socket);
-
-				
 			} catch (IOException ex) {
 				System.out.println("Server exception: " + ex.getMessage());
 				ex.printStackTrace();

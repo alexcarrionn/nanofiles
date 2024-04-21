@@ -36,10 +36,10 @@ public class NFControllerLogicP2P {
 		 */
 		
 		try {
-			NFServerSimple serversimple = new NFServerSimple();
-			serversimple.run();
-			/*NFServer server = new NFServer(); 
-			server.run();*/
+			/*NFServerSimple serversimple = new NFServerSimple();
+			serversimple.run();*/
+			NFServer server = new NFServer(); 
+			server.run();
 		} catch (IOException e) {
 			System.err.println("Excepcion de entrada/salida " + e.getMessage());
 			e.printStackTrace();

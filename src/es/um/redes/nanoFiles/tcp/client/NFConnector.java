@@ -72,7 +72,7 @@ public class NFConnector {
 	            }
 	            // Verifica la integridad del archivo descargado
 	            String newHash = FileDigest.computeFileChecksumString(file.getAbsolutePath());
-	            if (newHash.contains(targetFileHashSubstr)) {
+	            if (!newHash.contains(targetFileHashSubstr)) {
 	                System.err.println("El archivo descargado está corrupto.");
 	                downloaded = false;
 	            }

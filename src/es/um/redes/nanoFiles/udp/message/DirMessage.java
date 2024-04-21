@@ -41,7 +41,7 @@ public class DirMessage {
 	private static final String FIELDNAME_LOGINOK = "loginok";
 	private static final String FIELDNAME_SESSIONKEY = "sessionkey";
 	private static final String FIELDNAME_USERLIST = "userlist";
-	//private static final String FIELDNAME_FILELIST = "filelist";
+	private static final String FIELDNAME_FILELIST = "filelist";
 	private static final String FIELDNAME_PORT = "port";
 	private static final String FIELDNAME_LOGING_OUT = "logout";
 	/**
@@ -54,6 +54,7 @@ public class DirMessage {
 	 */
 	private String nickname;
 	private String[] users ;
+	private FileInfo[] files;
 	private int sessionKey;
 	private int port;
 	//private boolean isServer;
@@ -130,6 +131,15 @@ public class DirMessage {
 		this.logout = logout;
 	}
 
+	public FileInfo[] getFiles() {
+		return files;
+	}
+
+	public void setFiles(FileInfo[] files) {
+		this.files = files;
+	}
+
+	
 
 	/**
 	 * Método que convierte un mensaje codificado como una cadena de caracteres, a
@@ -202,6 +212,10 @@ public class DirMessage {
 				m.setPort(Integer.parseInt(value));
 				break;
 			}
+			case FIELDNAME_FILELIST:{
+				assert (m.getOperation().equals(DirMessageOps.OPERATION_FILE_LIST));
+				m.setFiles(FileInfo.loadFilesFromFolder(value));
+			}
 			
 			default:
 				System.err.println("PANIC: DirMessage.fromString - message with unknown field name " + fieldName);
@@ -257,6 +271,13 @@ public class DirMessage {
 				sb.append(FIELDNAME_LOGING_OUT + DELIMITER + logout + END_LINE);
 			}
 			break;}
+		case DirMessageOps.OPERATION_FILE_LIST :{
+			if(files.length!= 0 && !(files.length < 0)) {
+				sb.append(FIELDNAME_FILELIST + DELIMITER + Arrays.toString(files) + END_LINE);
+			}else {
+				break; 
+			}
+		}
 			
 			
 		}

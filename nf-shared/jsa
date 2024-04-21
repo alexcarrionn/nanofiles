@@ -1,0 +1,8 @@
+el nfcontroller solo tenemos que poner lo del automata
+el nfshell no tocar 
+nfcontroller logicdir logica necesaria para que haga lo de los comandos, es donde tenemos que hacer las cosas 
+junto el directory connector y el nfdirectory server 
+
+nos falta poner que si tenemos ya el nombre logueado, no podemos hacer otro login con ese nombre 
+
+nfp2p las acciones con las descargas de ficheros, nf connector se conecta con un servidos aqui se descarga y el nfserverComm los envia

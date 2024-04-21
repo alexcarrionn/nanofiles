@@ -22,7 +22,9 @@ public class NFServer implements Runnable {
 		/*
 		 * TODO: Crear un socket servidor y ligarlo a cualquier puerto disponible
 		 */
-		InetSocketAddress serverSocketAddress = new InetSocketAddress(10000); //le ponemos un 0 para que elija el primero disponible
+		InetSocketAddress serverSocketAddress = new InetSocketAddress(0); //le ponemos un 0 para que elija el primero disponible
+		//para saber el puerto en el que esta escuchando lo ponemos por pantalla 
+		System.out.println("NFSever puesto en el puerto " + serverSocketAddress.getPort());
 		serverSocket = new ServerSocket();
 		serverSocket.bind(serverSocketAddress);
 		//serverSocket.setSoTimeout(SERVERSOCKET_ACCEPT_TIMEOUT_MILISECS);
@@ -50,7 +52,7 @@ public class NFServer implements Runnable {
 		while(true) {
 			try {
 				socket = serverSocket.accept();
-				System.out.println("New client in the port : " + socket.getPort());
+				System.out.println("New client in the port : " + obtenerPuertoEscucha(socket));
 				NFServerComm.serveFilesToClient(socket);
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
@@ -64,7 +66,31 @@ public class NFServer implements Runnable {
 		 * cliente conectado, no podremos tener más de un cliente conectado a este
 		 * servidor.
 		 */
-
+			
+			
+		Socket socket2 = null;
+		while(true) {
+			try {
+				socket2 = serverSocket.accept();
+				System.out.println("New client in the port : " + socket.getPort());
+				
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			if(socket2 != null) {
+				NFServerThread hilo = new NFServerThread(socket2);
+				hilo.start(); 
+			}
+			else {
+				break; 
+			}
+			
+			
+		}
+		
+		
+			
 
 		}
 	}
@@ -79,7 +105,13 @@ public class NFServer implements Runnable {
 		new Thread(this).start(); 
 	}
 	
+	@SuppressWarnings("deprecation")
 	public void stopserver() {
-}
+		new Thread(this).stop();
+	}
+	
+	public int obtenerPuertoEscucha(Socket serverSocketAddress) {
+		return serverSocketAddress.getPort(); 
+	}
 
 }

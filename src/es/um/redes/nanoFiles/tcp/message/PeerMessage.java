@@ -103,8 +103,8 @@ public class PeerMessage {
 			message.setHashCode(new String(hash, "UTF-8"));
 			break;
 		case PeerMessageOps.OPCODE_DOWNLOAD_OK:
-			message.setLongitudByte(dis.readByte());
-			byte[] file= new byte[dis.readByte()];
+			message.setLongitudByte(dis.readInt());
+			byte[] file= new byte[message.getLongitudByte()];
 			dis.readFully(file);
 			message.setData(file); 
 			break;

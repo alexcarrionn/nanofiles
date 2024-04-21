@@ -13,5 +13,6 @@ public class DirMessageOps {
 	public static final String OPERATION_DOWNLOAD = "downloadFrom";
 	public static final String OPERATION_USER_LIST = "UserList";
 	public static final String OPERATION_FGSERVE = "fgserve";
+	public static final String OPERATION_FILE_LIST = "FileList";
 
 }

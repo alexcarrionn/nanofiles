@@ -48,19 +48,22 @@ public class NFServerComm {
 				if (ficherosEncontrados.length != 1) {
 					System.err.println("Mas de un fichero encontrado con el fragmento de hash " + subHashcode);
 				} else {
+					//cogemos los ficheros encontrados, el primero
 					FileInfo file = ficherosEncontrados[0];
+					//cogemos el filePath
 					String filePath = file.filePath;
-					// String hash= file.fileHash;
-					// String filepath = NanoFiles.db.lookupFilePath(hash);
+					//Hacemos un nuevo archivo con ese Path que hemos cogido
 					File archivo = new File(filePath);
+					
+					
 					PeerMessage mensajeEnviar = new PeerMessage(PeerMessageOps.OPCODE_DOWNLOAD_OK);
 					DataInputStream fis = new DataInputStream(new FileInputStream(archivo));
 					byte[] archivodata = new byte[(int) archivo.length()];
 					fis.readFully(archivodata);
-					fis.close();
 					mensajeEnviar.setLongitudByte(archivodata.length);
 					mensajeEnviar.setData(archivodata);
 					mensajeEnviar.writeMessageToOutputStream(dos);
+					fis.close(); 
 
 				}
 				dis.close();

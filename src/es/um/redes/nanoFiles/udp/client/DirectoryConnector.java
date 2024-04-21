@@ -323,9 +323,34 @@ public class DirectoryConnector {
 	 */
 	public boolean publishLocalFiles(FileInfo[] files) {
 		boolean success = false;
-
 		// TODO: Ver TODOs en logIntoDirectory y seguir esquema similar
-
+		/*
+		 		assert (sessionKey == INVALID_SESSION_KEY);
+		boolean success = false;
+		
+		username = nickname;
+		DirMessage m = new DirMessage(DirMessageOps.OPERATION_LOGIN);
+		m.setNickname(nickname);
+		String messageLogin = m.toString();
+		
+		byte[] sendData = messageLogin.getBytes();
+		
+		byte[] response = sendAndReceiveDatagrams(sendData);
+		DirMessage r = DirMessage.fromString(new String(response));
+		
+		boolean loginok = r.getLoginOk();
+		int num = r.getSessionKey();
+		
+		if (loginok && num <= 10000) {
+            System.out.println("SessionKey: " + num);
+            sessionKey = num;
+            success = true;
+            return success;
+        }
+		
+		System.err.println("Usuario ya registrado");
+		return success;
+		 */
 
 
 		return success;
@@ -339,13 +364,17 @@ public class DirectoryConnector {
 	 * 
 	 * @return Los ficheros publicados al directorio, o null si el directorio no
 	 *         pudo satisfacer nuestra solicitud
+	 * @throws IOException 
 	 */
-	public FileInfo[] getFileList() {
+	public FileInfo[] getFileList() throws IOException {
 		FileInfo[] filelist = null;
 		// TODO: Ver TODOs en logIntoDirectory y seguir esquema similar
-
-
-
+		DirMessage m = new DirMessage(DirMessageOps.OPERATION_FILE_LIST); 
+		String messageFileList = m.toString(); 
+		byte[] sendData = messageFileList.getBytes(); 
+		byte[] response = sendAndReceiveDatagrams(sendData); 
+		DirMessage r = DirMessage.fromString(new String(response));
+		filelist = r.getFiles(); 
 		return filelist;
 	}
 
