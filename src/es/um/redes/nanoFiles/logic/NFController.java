@@ -254,7 +254,43 @@ public class NFController {
 				System.err.println("You can't log out because you're not logged in.");
 			}
 			break;
-
+		case NFCommands.COM_BGSERVE: 
+			if (currentState != LOGGED_IN) {
+				commandAllowed = false;
+				System.err.println("You can't Use the backGroundServer because you are not logged in");
+			}
+			break; 
+		case NFCommands.COM_USERLIST: 
+			if (currentState != LOGGED_IN) {
+				commandAllowed = false;
+				System.err.println("You can't view the userlist because you are not logged in");
+			}
+			break;
+		case NFCommands.COM_FGSERVE: 
+			if (currentState != LOGGED_IN) {
+				commandAllowed = false;
+				System.err.println("You can't Use the FGServer because you are not logged in");
+			}
+			break;
+			
+		case NFCommands.COM_DOWNLOADFROM: 
+			if (currentState != LOGGED_IN) {
+				commandAllowed = false;
+				System.err.println("You can't Use downloadFrom because you are not logged in");
+			}
+			break;
+		case NFCommands.COM_FILELIST: 
+			if (currentState != LOGGED_IN) {
+				commandAllowed = false;
+				System.err.println("You can't view the FileList because you are not logged in");
+			}
+			break;
+		case NFCommands.COM_PUBLISH: 
+			if (currentState != LOGGED_IN) {
+				commandAllowed = false;
+				System.err.println("You can't publish your's files because you are not logged in");
+			}
+			break;
 		default:
 			// System.err.println("ERROR: undefined behaviour for " + currentCommand + "
 			// command!");

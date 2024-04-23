@@ -12,16 +12,17 @@ import java.util.Random;
 import es.um.redes.nanoFiles.tcp.client.NFConnector;
 import es.um.redes.nanoFiles.tcp.server.NFServer;
 import es.um.redes.nanoFiles.tcp.server.NFServerSimple;
+//import es.um.redes.nanoFiles.tcp.server.NFServerSimple;
 
 public class NFControllerLogicP2P {
 	/*
 	 * TODO: Para bgserve, se necesita un atributo NFServer que actuará como
 	 * servidor de ficheros en segundo plano de este peer
 	 */
-
-
-
-
+	
+	//NFServerSimple serversimple; 
+	NFServer server;  
+	
 	protected NFControllerLogicP2P() {
 	}
 
@@ -36,9 +37,9 @@ public class NFControllerLogicP2P {
 		 */
 		
 		try {
-			/*NFServerSimple serversimple = new NFServerSimple();
+			/*serversimple = new NFServerSimple();
 			serversimple.run();*/
-			NFServer server = new NFServer(); 
+			NFServerSimple server = new NFServerSimple(); 
 			server.run();
 		} catch (IOException e) {
 			System.err.println("Excepcion de entrada/salida " + e.getMessage());
@@ -76,8 +77,18 @@ public class NFControllerLogicP2P {
 		 * este método. Si se produce una excepción de entrada/salida (error del que no
 		 * es posible recuperarse), se debe informar sin abortar el programa
 		 */
-
-
+		
+		if(server == null) {
+			try {
+				server = new NFServer(); 
+			} catch (IOException e) {
+				System.err.println("Excepcion de entrada/salida " + e.getMessage());
+				e.printStackTrace();
+			}
+			
+			server.startServer(); 
+			
+		}
 
 		return false;
 	}
@@ -166,9 +177,7 @@ public class NFControllerLogicP2P {
 		 * TODO: Devolver el puerto de escucha de nuestro servidor de ficheros en
 		 * segundo plano
 		 */
-
-
-
+		 
 		return port;
 	}
 
@@ -180,9 +189,9 @@ public class NFControllerLogicP2P {
 		/*
 		 * TODO: Enviar señal para detener nuestro servidor de ficheros en segundo plano
 		 */
-
-
-
+		
+		server.stopserver();
+		server = null; 
 	}
 
 }

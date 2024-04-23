@@ -77,7 +77,8 @@ public class NFDirectoryServer {
 		 * (estructuras de datos que mantiene el servidor: nicks, sessionKeys, etc.)
 		 */
 		nicks = new HashMap<>(); 
-		sessionKeys = new HashMap<>(); 
+		sessionKeys = new HashMap<>();
+		clientsAddresses = new HashMap<>(); 
 		
 
 		if (NanoFiles.testMode) {
@@ -239,7 +240,7 @@ public class NFDirectoryServer {
 					DatagramPacket packetToClient = new DatagramPacket (sendData, sendData.length, clientAddr);
 					
 					socket.send(packetToClient);
-					System.out.println("Sending message to client \"" + new String(sendData) + "\"");
+					//System.out.println("Sending message to client \"" + new String(sendData) + "\"");
 				}
 			} else {
 				System.err.println("Directory ignores EMPTY datagram from " + clientAddr);

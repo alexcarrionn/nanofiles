@@ -18,7 +18,7 @@ public class NFServerThread extends Thread {
 
     @Override
     public void run() {
-        // Handle communication with the client
+        //Establece comunicacion con el cliente
         try {
 			NFServerComm.serveFilesToClient(clientSocket);
 		} catch (IOException e) {

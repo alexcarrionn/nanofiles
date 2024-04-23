@@ -21,14 +21,14 @@ public class NFServerSimple {
 	    boolean success = false;
 	    while (!success) {
 	        try {
-	            InetSocketAddress socketAddress = new InetSocketAddress(port);
+	            InetSocketAddress socketAddress = new InetSocketAddress(PORT);
 	            serverSocket = new ServerSocket(); 
 	            //serverSocket.setSoTimeout(SERVERSOCKET_ACCEPT_TIMEOUT_MILISECS);
+	            serverSocket.setReuseAddress(true);
 	            serverSocket.bind(socketAddress);
 	            // Si llega aqui sin que salte excepcion significa que ha creado con exito el
 	            // servidor
 	            success = true;
-	            System.out.println("Servidor iniciado en el puerto: " + port);
 	        } catch (BindException e) {
 	            // Excepcion que salta si ya esta el puerto ocupado
 	            System.err.println("Puerto número: " + port + " ocupado. Intentando con el puerto " + (port + 1));
