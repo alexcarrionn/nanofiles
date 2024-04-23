@@ -21,10 +21,9 @@ public class NFServerSimple {
 	    boolean success = false;
 	    while (!success) {
 	        try {
-	            InetSocketAddress socketAddress = new InetSocketAddress(PORT);
+	            InetSocketAddress socketAddress = new InetSocketAddress(port);
 	            serverSocket = new ServerSocket(); 
 	            //serverSocket.setSoTimeout(SERVERSOCKET_ACCEPT_TIMEOUT_MILISECS);
-	            serverSocket.setReuseAddress(true);
 	            serverSocket.bind(socketAddress);
 	            // Si llega aqui sin que salte excepcion significa que ha creado con exito el
 	            // servidor

@@ -174,7 +174,6 @@ public class NFControllerLogicDir {
 		 * operación.
 		 */
 		boolean result = false;
-		directoryConnector
 		
 
 		return result;
