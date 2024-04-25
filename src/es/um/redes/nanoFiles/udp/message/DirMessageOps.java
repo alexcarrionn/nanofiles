@@ -14,5 +14,9 @@ public class DirMessageOps {
 	public static final String OPERATION_USER_LIST = "UserList";
 	public static final String OPERATION_FGSERVE = "fgserve";
 	public static final String OPERATION_FILE_LIST = "FileList";
+	public static final String OPERATION_PUBLISH = "Publish";
+	public static final String OPERATION_PORT_REGISTER = "PortRegister";
+	public static final String OPERATION_PUBLISH_RESPONSE = "Publish_response"; 
+	
 
 }

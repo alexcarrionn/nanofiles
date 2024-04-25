@@ -111,10 +111,10 @@ public class NFControllerLogicDir {
 		boolean result = false;
 		System.out.println("Encontrando a los usuarios: ");
 		String[] users;
-			users = directoryConnector.getUserList();
-			String userslist = String.join(", ", users);
-			System.out.println("UserList: " + userslist);
-			result = true; 
+		users = directoryConnector.getUserList();
+		String userslist = String.join(", ", users);
+		System.out.println("UserList: " + userslist);
+		result = true; 
 		
 		return result;
 	}
@@ -122,8 +122,9 @@ public class NFControllerLogicDir {
 	/**
 	 * Método para obtener y mostrar la lista de ficheros que los peer servidores
 	 * han publicado al directorio
+	 * @throws IOException 
 	 */
-	protected boolean getAndPrintFileList() {
+	protected boolean getAndPrintFileList() throws IOException {
 		/*
 		 * TODO: Obtener la lista de ficheros servidos. Comunicarse con el directorio (a
 		 * través del directoryConnector) para obtener la lista de ficheros e imprimirla
@@ -131,9 +132,11 @@ public class NFControllerLogicDir {
 		 * operación.
 		 */
 		boolean result = false;
-
-
-
+		FileInfo[] ficheros = directoryConnector.getFileList(); 
+		if(ficheros != null) {
+			result = true; 
+		}
+		
 		return result;
 	}
 
@@ -154,18 +157,17 @@ public class NFControllerLogicDir {
 		 * éxito/fracaso de la operación.
 		 */
 		boolean result = false;
-
-
-
+		result = directoryConnector.registerServerPort(serverPort); 
 		return result;
 	}
 
 	/**
 	 * Método para enviar al directorio la lista de ficheros que este peer servidor
 	 * comparte con el resto (ver método filelist).
+	 * @throws IOException 
 	 * 
 	 */
-	protected boolean publishLocalFiles() {
+	protected boolean publishLocalFiles() throws IOException {
 		/*
 		 * TODO: Comunicarse con el directorio (a través del directoryConnector) para
 		 * enviar la lista de ficheros servidos por este peer. Los ficheros de la
@@ -174,8 +176,13 @@ public class NFControllerLogicDir {
 		 * operación.
 		 */
 		boolean result = false;
-		
-
+		FileInfo[] ficheros = NanoFiles.db.getFiles();
+		if(ficheros != null) {
+			result = directoryConnector.publishLocalFiles(ficheros);
+			System.out.println("Successfully published!");}
+		else {
+			System.err.println("No se han encontrado ficheros para publicar");
+		}
 		return result;
 	}
 
@@ -216,20 +223,8 @@ public class NFControllerLogicDir {
 	 */
 	public InetSocketAddress getServerAddress(String serverNicknameOrSocketAddr) throws UnknownHostException {
 		InetSocketAddress fserverAddr = null;
-		/*
-		 * TODO: Averiguar si el nickname es en realidad una cadena "IP:puerto", en cuyo
-		 * caso no es necesario comunicarse con el directorio (simplemente se devuelve
-		 * un InetSocketAddress); en otro caso, utilizar el método
-		 * lookupServerAddrByUsername de esta clase para comunicarse con el directorio y
-		 * obtener la IP:puerto del servidor con dicho nickname. Devolver null si la
-		 * operación fracasa.
-		 */
+		
 		if (serverNicknameOrSocketAddr.contains(":")) { // Then it has to be a socket address (IP:port)
-			/*
-			 * TODO: Extraer la dirección IP y el puerto de la cadena y devolver un
-			 * InetSocketAddress. Para convertir un string con la IP a un objeto InetAddress
-			 * se debe usar InetAddress.getByName()
-			 */
 			String ip =serverNicknameOrSocketAddr.split(":")[0];
 			int puerto = Integer.parseInt(serverNicknameOrSocketAddr.split(":")[1]);
 			InetAddress socketAddr = InetAddress.getByName(ip);
@@ -237,10 +232,7 @@ public class NFControllerLogicDir {
 
 
 		} else {
-			/*
-			 * TODO: Si es un nickname, preguntar al directorio la IP:puerto asociada a
-			 * dicho peer servidor.
-			 */
+			
 			fserverAddr = lookupServerAddrByUsername(serverNicknameOrSocketAddr);
 		}
 		return fserverAddr;
@@ -309,7 +301,7 @@ public class NFControllerLogicDir {
 		 * para identificarse.
 		 */
 		boolean result = false;
-
+		
 
 
 		return result;

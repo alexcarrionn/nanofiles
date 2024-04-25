@@ -15,8 +15,10 @@ public class NFServer implements Runnable {
 	private ServerSocket serverSocket = null;
 	private boolean stopServer = false;
 	private static final int SERVERSOCKET_ACCEPT_TIMEOUT_MILISECS = 1000;
-	
-	
+
+	public ServerSocket getServerSocket() {
+		return serverSocket;
+	}
 
 	public NFServer() throws IOException {
 	    InetSocketAddress serverSocketAddress = new InetSocketAddress(0);
@@ -39,7 +41,7 @@ public class NFServer implements Runnable {
 	    while (!stopServer) {
 	        try {
 	            socket = serverSocket.accept();
-	            System.out.println("New client in the port : " + socket.getPort());
+	            //System.out.println("New client in the port : " + socket.getPort());
 	            
 	            // Si el servidor está detenido, no deberías aceptar más conexiones
 	            if (!stopServer) {
@@ -69,7 +71,7 @@ public class NFServer implements Runnable {
 		new Thread(this).start(); 
 	}
 	
-	
+	//Funcion para detener el servidor lanzado en el hilo 
 	public void stopserver() {
 		 stopServer = true;
 	        try {

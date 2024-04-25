@@ -58,6 +58,7 @@ public class DirectoryConnector {
 	private boolean successfulResponseStatus;
 	private String errorDescription;
 	private String username; 
+	private FileInfo[] ficheros; 
 	
 	public DirectoryConnector(String address) throws IOException {
 
@@ -95,25 +96,12 @@ public class DirectoryConnector {
 					"DirectoryConnector.sendAndReceiveDatagrams: make sure constructor initializes field \"socket\"");
 			System.exit(-1);
 		}
-		/*
-		 * TODO: Enviar datos en un datagrama al directorio y recibir una respuesta. El
-		 * array devuelto debe contener únicamente los datos recibidos, *NO* el búfer de
-		 * recepción al completo.
-		 */
-		//String requestData1 = requestData.toString(); 
+
 		DatagramPacket packetToServer = new DatagramPacket(requestData, requestData.length, directoryAddress);
 		socket.send(packetToServer);
 		System.out.println("Sending message to server: " + new String(requestData) );
 		
 		DatagramPacket packetFromServer = new DatagramPacket(responseData,responseData.length);
-		
-		/*
-		 * TODO: Una vez el envío y recepción asumiendo un canal confiable (sin
-		 * pérdidas) esté terminado y probado, debe implementarse un mecanismo de
-		 * retransmisión usando temporizador, en caso de que no se reciba respuesta en
-		 * el plazo de TIMEOUT. En caso de salte el timeout, se debe reintentar como
-		 * máximo en MAX_NUMBER_OF_ATTEMPTS ocasiones.
-		 */
 		
 		socket.setSoTimeout(TIMEOUT);
 		
@@ -133,19 +121,6 @@ public class DirectoryConnector {
 			socket.send(packetToServer); 
 			System.out.println("resending message to server");
 		}
-		
-		/*
-		 * TODO: Las excepciones que puedan lanzarse al leer/escribir en el socket deben
-		 * ser capturadas y tratadas en este método. Si se produce una excepción de
-		 * entrada/salida (error del que no es posible recuperarse), se debe informar y
-		 * terminar el programa.
-		 */
-		/*
-		 * NOTA: Las excepciones deben tratarse de la más concreta a la más genérica.
-		 * SocketTimeoutException es más concreta que IOException.
-		 */
-
-
 
 		if (response != null && response.length == responseData.length) {
 			System.err.println("Your response is as large as the datagram reception buffer!!\n"
@@ -245,11 +220,7 @@ public class DirectoryConnector {
 		byte[] sendData = messageUserList.getBytes(); 
 		byte[] response = sendAndReceiveDatagrams(sendData); 
 		DirMessage r = DirMessage.fromString(new String(response));
-		
 		userlist = r.getUsers(); 
-		
-		
-		
 		return userlist;
 	}
 
@@ -287,13 +258,33 @@ public class DirectoryConnector {
 	 *         servidor.
 	 */
 	public boolean registerServerPort(int serverPort) {
-		// TODO: Ver TODOs en logIntoDirectory y seguir esquema similar
-		boolean success = false;
-
-
-
-		return success;
+	    boolean success = false;
+	    try {
+	        // Crear un mensaje de solicitud de registro de servidor
+	        DirMessage registerMessage = new DirMessage(DirMessageOps.OPERATION_PORT_REGISTER);
+	        registerMessage.setServerPort(serverPort);
+	        registerMessage.setSessionKey(sessionKey); // Añadir la clave de sesión para identificación
+	        registerMessage.setNickname(username);
+	        // Convertir el mensaje a una cadena de bytes
+	        byte[] requestData = registerMessage.toString().getBytes();
+	        // Enviar el mensaje al directorio y recibir la respuesta
+	        byte[] responseData = sendAndReceiveDatagrams(requestData);
+	        
+	        // Convertir la respuesta a un objeto DirMessage
+	        DirMessage responseMessage = DirMessage.fromString(new String(responseData));
+	        int port = responseMessage.getServerPort(); 
+	        // Verificar si la operación fue exitosa en la respuesta recibida
+	        if(port != 0) {
+	        	success = true;
+	        }
+	        
+	        
+	    } catch (IOException e) {
+	        e.printStackTrace();
+	    }
+	    return success;
 	}
+
 
 	/**
 	 * Método para obtener del directorio la dirección de socket (IP:puerto)
@@ -320,40 +311,40 @@ public class DirectoryConnector {
 	 * @param files La lista de ficheros que este peer está sirviendo.
 	 * @return Verdadero si el directorio tiene registrado a este peer como servidor
 	 *         y acepta la lista de ficheros, falso en caso contrario.
+	 * @throws IOException 
 	 */
-	public boolean publishLocalFiles(FileInfo[] files) {
-		boolean success = false;
-		// TODO: Ver TODOs en logIntoDirectory y seguir esquema similar
-		/*
-		 		assert (sessionKey == INVALID_SESSION_KEY);
-		boolean success = false;
-		
-		username = nickname;
-		DirMessage m = new DirMessage(DirMessageOps.OPERATION_LOGIN);
-		m.setNickname(nickname);
-		String messageLogin = m.toString();
-		
-		byte[] sendData = messageLogin.getBytes();
-		
-		byte[] response = sendAndReceiveDatagrams(sendData);
-		DirMessage r = DirMessage.fromString(new String(response));
-		
-		boolean loginok = r.getLoginOk();
-		int num = r.getSessionKey();
-		
-		if (loginok && num <= 10000) {
-            System.out.println("SessionKey: " + num);
-            sessionKey = num;
-            success = true;
-            return success;
-        }
-		
-		System.err.println("Usuario ya registrado");
-		return success;
-		 */
-
-
-		return success;
+	public boolean publishLocalFiles(FileInfo[] files) throws IOException {
+	    boolean success = false;
+	    try {
+	        // Crear un mensaje para publicar archivos
+	        DirMessage message = new DirMessage(DirMessageOps.OPERATION_PUBLISH);
+	        message.setFiles(files);
+	        String messageString = message.toString();
+	        
+	        // Convertir el mensaje a bytes y enviarlo al servidor de directorio
+	        byte[] sendData = messageString.getBytes();
+	        byte[] responseData = sendAndReceiveDatagrams(sendData);
+	        
+	        // Interpretar la respuesta del servidor
+	        if (responseData != null) {
+	            DirMessage response = DirMessage.fromString(new String(responseData));
+	            if (response != null && response.getOperation().equals(DirMessageOps.OPERATION_PUBLISH_RESPONSE)) {
+	                // Verificar cualquier otro campo en la respuesta según sea necesario
+	                // Establecer success en true si la publicación fue exitosa
+	                success = true;
+	            } else {
+	                System.err.println("Error: Respuesta inesperada del servidor de directorio.");
+	            }
+	        } else {
+	            // No se recibió respuesta del servidor
+	            System.err.println("Error: No se recibió respuesta del servidor.");
+	        }
+	    } catch (IOException e) {
+	        // Manejar cualquier excepción de E/S que pueda ocurrir durante la comunicación
+	        System.err.println("Error de E/S durante la publicación de archivos: " + e.getMessage());
+	        throw e; // Relanzar la excepción para que el llamador también pueda manejarla si es necesario
+	    }
+	    return success;
 	}
 
 	/**
@@ -366,17 +357,22 @@ public class DirectoryConnector {
 	 *         pudo satisfacer nuestra solicitud
 	 * @throws IOException 
 	 */
-	public FileInfo[] getFileList() throws IOException {
-		FileInfo[] filelist = null;
-		// TODO: Ver TODOs en logIntoDirectory y seguir esquema similar
-		DirMessage m = new DirMessage(DirMessageOps.OPERATION_FILE_LIST); 
-		String messageFileList = m.toString(); 
-		byte[] sendData = messageFileList.getBytes(); 
-		byte[] response = sendAndReceiveDatagrams(sendData); 
-		DirMessage r = DirMessage.fromString(new String(response));
-		filelist = r.getFiles(); 
-		return filelist;
+	public FileInfo[] getFileList() {
+	    FileInfo[] filelist = null;
+	    try {
+	        DirMessage m = new DirMessage(DirMessageOps.OPERATION_FILE_LIST);
+	        String messageFileList = m.toString();
+	        byte[] sendData = messageFileList.getBytes();
+	        byte[] response = sendAndReceiveDatagrams(sendData);
+	        DirMessage r = DirMessage.fromString(new String(response));
+	        filelist = r.getFiles();
+	    } catch (IOException e) {
+	        // Maneja la excepción de comunicación con el servidor
+	        e.printStackTrace();
+	    }
+	    return filelist;
 	}
+
 
 	/**
 	 * Método para obtener la lista de nicknames de los peers servidores que tienen

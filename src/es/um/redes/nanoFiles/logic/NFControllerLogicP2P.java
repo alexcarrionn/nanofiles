@@ -87,7 +87,10 @@ public class NFControllerLogicP2P {
 			}
 			
 			server.startServer(); 
-			
+			//return true;  
+		}
+		else {
+			System.err.println("Ya hay un servidor activo");
 		}
 
 		return false;
@@ -177,7 +180,7 @@ public class NFControllerLogicP2P {
 		 * TODO: Devolver el puerto de escucha de nuestro servidor de ficheros en
 		 * segundo plano
 		 */
-		 
+		port = server.getServerSocket().getLocalPort();  
 		return port;
 	}
 

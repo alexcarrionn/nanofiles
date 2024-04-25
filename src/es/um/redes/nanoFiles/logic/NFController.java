@@ -267,10 +267,7 @@ public class NFController {
 			}
 			break;
 		case NFCommands.COM_FGSERVE: 
-			if (currentState != LOGGED_IN) {
-				commandAllowed = false;
-				System.err.println("You can't Use the FGServer because you are not logged in");
-			}
+				commandAllowed = true;
 			break;
 			
 		case NFCommands.COM_DOWNLOADFROM: 
@@ -292,8 +289,6 @@ public class NFController {
 			}
 			break;
 		default:
-			// System.err.println("ERROR: undefined behaviour for " + currentCommand + "
-			// command!");
 		}
 		return commandAllowed;
 	}

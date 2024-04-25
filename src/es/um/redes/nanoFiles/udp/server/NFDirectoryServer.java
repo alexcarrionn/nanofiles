@@ -1,5 +1,6 @@
 package es.um.redes.nanoFiles.udp.server;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -45,7 +46,7 @@ public class NFDirectoryServer {
 	 */
 
 	private HashMap<String, InetSocketAddress> clientsAddresses;
-
+ 
 
 	/**
 	 * Generador de claves de sesión aleatorias (sessionKeys)
@@ -143,82 +144,7 @@ public class NFDirectoryServer {
 				if (NanoFiles.testMode) { // En modo de prueba (mensajes en "crudo", boletín UDP)
 					System.out.println("[testMode] Contents interpreted as " + dataLength + "-byte String: \""
 							+ messageFromClient + "\"");
-					/*
-					 * TODO: (Boletín UDP) Comprobar que se ha recibido un datagrama con la cadena
-					 * "login" y en ese caso enviar como respuesta un mensaje al cliente con la
-					 * cadena "loginok". Si el mensaje recibido no es "login", se informa del error
-					 * y no se envía ninguna respuesta.
-					 */
-					/*if (messageFromClient.equals("login")) {
-						int  NUM = random.nextInt(10000);
-						String data = "loginok&"+NUM;
-						byte[] sendData =  data.getBytes();
-						DatagramPacket packetLoginOk = new DatagramPacket ( sendData, sendData.length, clientAddr);
-						socket.send(packetLoginOk);
-						System.out.println(
-								"Sending datagram with message \"" + new String(sendData) + "\"");
-					}
-					else {
-						System.err.println("La cadena recibida no es \"login\"");
-					}
 
-
-				} else {
-				// Servidor funcionando en modo producción (mensajes bien formados)
-
-					// Vemos si el mensaje debe ser ignorado por la probabilidad de descarte
-					/*
-					 * double rand = Math.random(); if (rand < messageDiscardProbability) {
-					 * System.err.println("Directory DISCARDED datagram from " + clientAddr);
-					 * continue; }
-					 */
-					
-					/*String user = new String(messageFromClient).split("&")[1];
-					
-					//Comprobar que mensaje tiene cadena login y usuario esta formado al menos por un caracter
-					if(new String(messageFromClient).split("&")[0].equals("login") && user.matches("[a-zA-Z0-9_]+")) {
-						System.out.println("User " + user + " is trying to log into directory...");
-						
-						if(!nicks.containsKey(user)) {
-							int sessionKey = random.nextInt(1000);
-							System.out.println("User "+ user + "succesfully logged into directory with session key " + sessionKey);
-							nicks.put(user, sessionKey);
-							
-							byte[] sendData = ("loginok&" + sessionKey).getBytes();
-							DatagramPacket packetLoginOk = new DatagramPacket(sendData, sendData.length, clientAddr);
-							socket.send(packetLoginOk);
-						
-							System.out.println("Sending message to client: \"" + new String(sendData) + "\"");
-					
-						}else {
-							byte[] sendData = ("login_failed:-1").getBytes();
-							DatagramPacket packetLoginFailed = new DatagramPacket(sendData, sendData.length, clientAddr);
-							socket.send(packetLoginFailed);
-						}
-					}else {
-						System.err.println("Expected to receive \"login&user\"");
-						
-					}
-					
-					if (messageFromClient.equals("login&alumno")) {
-						int  NUM = random.nextInt(10000);
-						String data = "loginok&"+NUM;
-						byte[] sendData =  data.getBytes();
-						DatagramPacket packetLoginOk = new DatagramPacket ( sendData, sendData.length, clientAddr);
-						socket.send(packetLoginOk);
-						System.out.println(
-								"Sending datagram with message \"" + new String(sendData) + "\"");
-					}
-					else {
-						System.err.println("La cadena recibida no es \"login\"");
-					}
-					/*
-					 * TODO: Construir String partir de los datos recibidos en el datagrama. A
-					 * continuación, imprimir por pantalla dicha cadena a modo de depuración.
-					 * Después, usar la cadena para construir un objeto DirMessage que contenga en
-					 * sus atributos los valores del mensaje (fromString).
-					 */
-					//System.out.println("La cadena recibida es \""+ messageFromClient +"\"");
 				}else {
 					DirMessage op = DirMessage.fromString(messageFromClient);
 					/*
@@ -266,17 +192,6 @@ public class NFDirectoryServer {
 		case DirMessageOps.OPERATION_LOGIN: {
 			String username = msg.getNickname();
 
-			/*
-			 * TODO: Comprobamos si tenemos dicho usuario registrado (atributo "nicks"). Si
-			 * no está, generamos su sessionKey (número aleatorio entre 0 y 1000) y añadimos
-			 * el nick y su sessionKey asociada. NOTA: Puedes usar random.nextInt(10000)
-			 * para generar la session key
-			 */
-			/*
-			 * TODO: Construimos un mensaje de respuesta que indique el éxito/fracaso del
-			 * login y contenga la sessionKey en caso de éxito, y lo devolvemos como
-			 * resultado del método.
-			 */
 			if(!nicks.containsKey(username)) {
 				int sessionKey = random.nextInt(10000);
 				nicks.put(username, sessionKey); 
@@ -289,15 +204,6 @@ public class NFDirectoryServer {
 				response = new DirMessage(DirMessageOps.OPERATION_LOGIN ); 
 				response.setLoginOk(false);
 			}
-			
-			/*
-			 * TODO: Imprimimos por pantalla el resultado de procesar la petición recibida
-			 * (éxito o fracaso) con los datos relevantes, a modo de depuración en el
-			 * servidor
-			 */
-			/*System.out.println("Response to the operation login sent to: "+clientAddr);
-			System.out.println("The message is: "+ response.toString());
-			return response; */
 			break; 
 			 
 		}
@@ -321,8 +227,47 @@ public class NFDirectoryServer {
 			response.setUsers(keysArray); 
 			break; 
 		}
-			
+		case DirMessageOps.OPERATION_FILE_LIST: {
+		    response = new DirMessage(DirMessageOps.OPERATION_FILE_LIST);
+		    String sharedFolderPath = new File("nf-shared").getAbsolutePath();
+		    File sharedFolder = new File(sharedFolderPath);
+		    FileInfo[] files = null;
+		    if (sharedFolder.exists() && sharedFolder.isDirectory()) {
+		        files = FileInfo.loadFilesFromFolder(sharedFolderPath);
+		        response.setFiles(files);
+		    }
+		    break;
+		}
 
+		case DirMessageOps.OPERATION_PUBLISH: {
+		    // Obtener la ruta completa de la carpeta compartida
+		    String sharedFolderPath = "nf-shared"; 
+		    // Obtener la lista de archivos en la carpeta compartida en nuestro caso nf-shared
+		    File sharedFolder = new File(sharedFolderPath);
+		    FileInfo[] files = null;
+		    if (sharedFolder.exists() && sharedFolder.isDirectory()) {
+		        files = FileInfo.loadFilesFromFolder(sharedFolderPath);
+		    } else {
+		        System.err.println("La carpeta compartida no existe o no es una carpeta válida.");
+		    }
+
+		    if (files != null && files.length > 0) {
+		        System.out.println("Archivos publicados:");
+		        for (FileInfo file : files) {
+		            System.out.println("- " + file);
+		        }
+		    } else {
+		        System.out.println("No se han encontrado archivos para publicar en la carpeta compartida.");
+		    }
+
+		    // Construir un mensaje de respuesta indicando si la publicación fue exitosa
+		    response = new DirMessage(DirMessageOps.OPERATION_PUBLISH_RESPONSE);
+		    // Aquí lo que se hace es poner la respuesta del Publish a true en el caso en el que encuentre algún fichero compatible
+		    response.setPublishResponse(files != null && files.length > 0); 
+		    break;
+		}
+
+        
 		default:
 			System.out.println("Unexpected message operation: \"" + operation + "\"");
 		}

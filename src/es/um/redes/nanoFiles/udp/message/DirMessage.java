@@ -44,6 +44,9 @@ public class DirMessage {
 	private static final String FIELDNAME_FILELIST = "filelist";
 	private static final String FIELDNAME_PORT = "port";
 	private static final String FIELDNAME_LOGING_OUT = "logout";
+	private static final String FIELDNAME_PORT_REGISTER = "PortRegister";
+	private static final String FIELDNAME_PUBLISH_RESPONSE = "publishresponse";
+	private static final String FIELDNAME_PUBLISH = "publish";
 	/**
 	 * Tipo del mensaje, de entre los tipos definidos en PeerMessageOps.
 	 */
@@ -53,27 +56,22 @@ public class DirMessage {
 	 * diferentes mensajes de este protocolo.
 	 */
 	private String nickname;
-	private String[] users ;
+	private String[] users;
+	private String[] userServer; 
 	private FileInfo[] files;
 	private int sessionKey;
 	private int port;
-	//private boolean isServer;
-	//private String files;
 	private boolean loginok;
 	private boolean logout;
+	private int serverPort;
+	private boolean publishResponse;
 	//atributos del mensaje con el getUser una lista, aqui poner una lista 
-
-
-
 
 	public DirMessage(String op) {
 		operation = op;
-		users = new String[0]; 
+		users = new String[0];
+		files = new FileInfo[0]; 
 	}
-
-
-
-
 	/*
 	 * TODO: Crear diferentes constructores adecuados para construir mensajes de
 	 * diferentes tipos con sus correspondientes argumentos (campos del mensaje)
@@ -84,7 +82,6 @@ public class DirMessage {
 	}
 
 	public void setNickname(String nick) {
-	//comprobar que es para un mensaje por ejemplo un login y que no haga nada para otros que no utilicen el nickname
 	nickname = nick;
 	}
 
@@ -139,7 +136,31 @@ public class DirMessage {
 		this.files = files;
 	}
 
+
+	public int getServerPort() {
+		return serverPort;
+	}
+
+	public void setServerPort(int serverPort) {
+		this.serverPort = serverPort;
+	}
 	
+	public String[] getUserServer() {
+		return userServer;
+	}
+	
+	public void setUserServer(String[] userServer) {
+		this.userServer = userServer;
+	}
+
+	public boolean isPublishResponse() {
+        return publishResponse;
+    }
+
+    public void setPublishResponse(boolean publishResponse) {
+        this.publishResponse = publishResponse;
+    }
+
 
 	/**
 	 * Método que convierte un mensaje codificado como una cadena de caracteres, a
@@ -213,11 +234,51 @@ public class DirMessage {
 				break;
 			}
 			case FIELDNAME_FILELIST:{
-				assert (m.getOperation().equals(DirMessageOps.OPERATION_FILE_LIST));
-				m.setFiles(FileInfo.loadFilesFromFolder(value));
+			    assert (m.getOperation().equals(DirMessageOps.OPERATION_FILE_LIST));
+			    // Divide la cadena de archivos en partes separadas por el delimitador
+			    String[] fileInfos = value.split("; ");
+			    // Crea un array de FileInfo para almacenar los detalles de los archivos
+			    FileInfo[] files = new FileInfo[fileInfos.length];
+			    // Para cada cadena de archivo, divide los detalles en partes separadas por ", "
+			    for (int i = 0; i < fileInfos.length; i++) {
+			        String[] fileInfoParts = fileInfos[i].split(", ");
+			        // El primer elemento es el nombre del archivo
+			        String name = fileInfoParts[0];
+			        // Si hay más elementos, el segundo es el tamaño y el tercero es el hash
+			        long size = 0;
+			        String hash = "";
+			        if (fileInfoParts.length > 1) {
+			            // Extrae el tamaño y el hash si están disponibles
+			            size = Long.parseLong(fileInfoParts[1].replace(" bytes", ""));
+			            hash = fileInfoParts[2];
+			        }
+			        // Crea un nuevo objeto FileInfo con el nombre y los detalles opcionales
+			        files[i] = new FileInfo(name," ", size, hash);
+			    }
+			    m.setFiles(files);
+			    break; 
 			}
+
+
 			
-			default:
+			case FIELDNAME_PORT_REGISTER:{
+				assert (m.getOperation().equals(DirMessageOps.OPERATION_PORT_REGISTER));
+				m.setServerPort(Integer.parseInt(value));
+				break;
+			}
+			case FIELDNAME_PUBLISH: {
+			    assert (m.getOperation().equals(DirMessageOps.OPERATION_PUBLISH));
+			    m.setFiles(FileInfo.loadFilesFromFolder(value));
+			    break;
+			}
+
+            case FIELDNAME_PUBLISH_RESPONSE: {
+                assert (m.getOperation().equals(DirMessageOps.OPERATION_PUBLISH_RESPONSE));
+                m.setPublishResponse(Boolean.parseBoolean(value));
+                break;
+            }
+            
+            default:
 				System.err.println("PANIC: DirMessage.fromString - message with unknown field name " + fieldName);
 				System.err.println("Message was:\n" + message);
 				System.exit(-1);
@@ -271,15 +332,44 @@ public class DirMessage {
 				sb.append(FIELDNAME_LOGING_OUT + DELIMITER + logout + END_LINE);
 			}
 			break;}
-		case DirMessageOps.OPERATION_FILE_LIST :{
-			if(files.length!= 0 && !(files.length < 0)) {
-				sb.append(FIELDNAME_FILELIST + DELIMITER + Arrays.toString(files) + END_LINE);
-			}else {
-				break; 
-			}
+		case DirMessageOps.OPERATION_FILE_LIST: {
+		    if (files.length > 0) {
+		        // Construye una cadena con la representación de los archivos
+		        StringBuilder filesString = new StringBuilder();
+		        for (FileInfo file : files) {
+		            filesString.append(file.fileName).append(", "); // Nombre del archivo
+		            filesString.append(file.fileSize).append(" bytes, "); // Tamaño del archivo
+		            filesString.append(file.fileHash).append("; "); // Hash del archivo
+		        }
+		        // Agrega los detalles de los archivos al mensaje
+		        sb.append(FIELDNAME_FILELIST + DELIMITER + filesString.toString() + END_LINE);
+		    }
+		    break;
 		}
-			
-			
+
+
+		case DirMessageOps.OPERATION_PORT_REGISTER:{
+			sb.append(FIELDNAME_PORT_REGISTER + DELIMITER + serverPort + END_LINE);
+			break; 
+		}
+		
+		case DirMessageOps.OPERATION_PUBLISH_RESPONSE: {
+            sb.append(FIELDNAME_PUBLISH_RESPONSE+ DELIMITER + publishResponse + END_LINE);
+            break;
+        }
+		/*case DirMessageOps.OPERATION_PUBLISH:{
+		    //Construir una cadena con la representación de los archivos
+		    StringBuilder filesString = new StringBuilder();
+		    for (FileInfo file : files) {
+		        filesString.append(file.toString()).append(";");
+		    }
+		    // Agregar los archivos al mensaje
+			String ruta = "nf-shared"; 
+		    sb.append(FIELDNAME_PUBLISH + DELIMITER + ruta + END_LINE);
+		    break;
+		}*/
+	    
+				
 		}
 	    sb.append(END_LINE); // Marcamos el final del mensaje
 	    return sb.toString();
