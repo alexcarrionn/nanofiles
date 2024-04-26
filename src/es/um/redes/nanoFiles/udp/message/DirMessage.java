@@ -1,12 +1,12 @@
 package es.um.redes.nanoFiles.udp.message;
 
-import java.net.InetAddress;
+/*import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.UnknownHostException;
+import java.net.UnknownHostException;*/
 import java.util.Arrays;
-import java.util.Collections;
+/*import java.util.Collections;
 import java.util.LinkedList;
-import java.util.List;
+import java.util.List;*/
 
 import es.um.redes.nanoFiles.util.FileInfo;
 
@@ -24,10 +24,7 @@ public class DirMessage {
 
 	private static final char DELIMITER = ':'; // Define el delimitador
 	private static final char END_LINE = '\n'; // Define el carácter de fin de línea
-	/*
-	private static final String SUCCESS = "succes";
-	private static final String FAIL = "fail";
-	*/
+
 	/**
 	 * Nombre del campo que define el tipo de mensaje (primera línea)
 	 */
@@ -44,9 +41,11 @@ public class DirMessage {
 	private static final String FIELDNAME_FILELIST = "filelist";
 	private static final String FIELDNAME_PORT = "port";
 	private static final String FIELDNAME_LOGING_OUT = "logout";
-	private static final String FIELDNAME_PORT_REGISTER = "PortRegister";
 	private static final String FIELDNAME_PUBLISH_RESPONSE = "publishresponse";
 	private static final String FIELDNAME_PUBLISH = "publish";
+	private static final String FIELDNAME_REGISTEROK = "registerok";
+	private static final String FIELDNAME_UNREGISTEROK = "unregister";
+	private static final String FIELDNAME_FILE_SERVERS = "fileservers";
 	/**
 	 * Tipo del mensaje, de entre los tipos definidos en PeerMessageOps.
 	 */
@@ -57,14 +56,15 @@ public class DirMessage {
 	 */
 	private String nickname;
 	private String[] users;
-	private String[] userServer; 
+	private String[] filesServer; 
 	private FileInfo[] files;
 	private int sessionKey;
 	private int port;
 	private boolean loginok;
 	private boolean logout;
-	private int serverPort;
 	private boolean publishResponse;
+	private boolean unregisterOk; 
+	private boolean registerOk; 
 	//atributos del mensaje con el getUser una lista, aqui poner una lista 
 
 	public DirMessage(String op) {
@@ -76,10 +76,43 @@ public class DirMessage {
 	 * TODO: Crear diferentes constructores adecuados para construir mensajes de
 	 * diferentes tipos con sus correspondientes argumentos (campos del mensaje)
 	 */
+	
 
 	public String getOperation() {
 		return operation;
 	}
+
+	public String[] getFilesServer() {
+		return filesServer;
+	}
+
+	public void setFilesServer(String[] filesServer) {
+		this.filesServer = filesServer;
+	}
+
+	public boolean isRegisterOk() {
+		return registerOk;
+	}
+
+
+
+	public void setRegisterOk(boolean registerOk) {
+		this.registerOk = registerOk;
+	}
+
+
+
+	public boolean isUnregisterOk() {
+		return unregisterOk;
+	}
+
+
+
+	public void setUnregisterOk(boolean _unregisterOk) {
+		unregisterOk = _unregisterOk;
+	}
+
+
 
 	public void setNickname(String nick) {
 	nickname = nick;
@@ -112,8 +145,8 @@ public class DirMessage {
 		this.users = userlist;
 	}
 
-	public String getPort(String port) {
-		return port;
+	public int getPort() {
+		return this.port;
 	}
 
 	public void setPort(int port) {
@@ -135,22 +168,13 @@ public class DirMessage {
 	public void setFiles(FileInfo[] files) {
 		this.files = files;
 	}
-
-
-	public int getServerPort() {
-		return serverPort;
-	}
-
-	public void setServerPort(int serverPort) {
-		this.serverPort = serverPort;
-	}
 	
 	public String[] getUserServer() {
-		return userServer;
+		return filesServer;
 	}
 	
 	public void setUserServer(String[] userServer) {
-		this.userServer = userServer;
+		this.filesServer = userServer;
 	}
 
 	public boolean isPublishResponse() {
@@ -178,9 +202,8 @@ public class DirMessage {
 		 * guardarlo en variables locales.
 		 */
 
-		System.out.println("DirMessage read from socket:");
-		System.out.println(message);
-		
+		//System.out.println("DirMessage read from socket:");
+		//System.out.println(message);
 		String[] lines = message.split(END_LINE + "");
 		// Local variables to save data during parsing
 		DirMessage m = null;
@@ -253,19 +276,13 @@ public class DirMessage {
 			            hash = fileInfoParts[2];
 			        }
 			        // Crea un nuevo objeto FileInfo con el nombre y los detalles opcionales
-			        files[i] = new FileInfo(name," ", size, hash);
+			        files[i] = new FileInfo(hash,name, size, " ");
 			    }
 			    m.setFiles(files);
+			    
 			    break; 
 			}
-
-
 			
-			case FIELDNAME_PORT_REGISTER:{
-				assert (m.getOperation().equals(DirMessageOps.OPERATION_PORT_REGISTER));
-				m.setServerPort(Integer.parseInt(value));
-				break;
-			}
 			case FIELDNAME_PUBLISH: {
 			    assert (m.getOperation().equals(DirMessageOps.OPERATION_PUBLISH));
 			    m.setFiles(FileInfo.loadFilesFromFolder(value));
@@ -277,6 +294,23 @@ public class DirMessage {
                 m.setPublishResponse(Boolean.parseBoolean(value));
                 break;
             }
+            
+            case FIELDNAME_REGISTEROK:{
+            	m.setRegisterOk(Boolean.parseBoolean(value));
+            	break;
+            }
+            case FIELDNAME_UNREGISTEROK: {
+                m.setUnregisterOk(Boolean.parseBoolean(value));
+                break;
+            }
+            case FIELDNAME_FILE_SERVERS: {
+				// Eliminar los corchetes al principio y al final del string
+		        value = value.substring(1, value.length() - 1);
+		        // Dividir el string en un array de strings usando la coma como delimitador
+		        m.setFilesServer(value.split(", "));
+		        break;
+			}
+            
             
             default:
 				System.err.println("PANIC: DirMessage.fromString - message with unknown field name " + fieldName);
@@ -318,6 +352,10 @@ public class DirMessage {
 		case DirMessageOps.OPERATION_USER_LIST: {
 			if(users.length != 0 && !(users.length <0)) {
 				sb.append(FIELDNAME_USERLIST + DELIMITER + Arrays.toString(users) + END_LINE);
+				sb.append(FIELDNAME_FILE_SERVERS + DELIMITER + Arrays.toString(filesServer) + END_LINE);
+			} else {
+				sb.append(FIELDNAME_NICKNAME + DELIMITER + nickname + END_LINE);
+				sb.append(FIELDNAME_SESSIONKEY + DELIMITER + sessionKey + END_LINE);
 			}
 			break;
 		}
@@ -346,29 +384,35 @@ public class DirMessage {
 		    }
 		    break;
 		}
-
-
-		case DirMessageOps.OPERATION_PORT_REGISTER:{
-			sb.append(FIELDNAME_PORT_REGISTER + DELIMITER + serverPort + END_LINE);
-			break; 
-		}
 		
 		case DirMessageOps.OPERATION_PUBLISH_RESPONSE: {
+			//Le devuelve una respuesta en funcion de si ha sido o no un exito la publicacion de ficheros
             sb.append(FIELDNAME_PUBLISH_RESPONSE+ DELIMITER + publishResponse + END_LINE);
             break;
         }
-		/*case DirMessageOps.OPERATION_PUBLISH:{
-		    //Construir una cadena con la representación de los archivos
-		    StringBuilder filesString = new StringBuilder();
-		    for (FileInfo file : files) {
-		        filesString.append(file.toString()).append(";");
-		    }
-		    // Agregar los archivos al mensaje
-			String ruta = "nf-shared"; 
-		    sb.append(FIELDNAME_PUBLISH + DELIMITER + ruta + END_LINE);
-		    break;
-		}*/
-	    
+		
+		case DirMessageOps.OPERATION_REGISTER_FILE_SERVER: {
+			// Si es un response, la variable puerto no estará inicializada y será 0
+			if (port != 0) {
+				sb.append(FIELDNAME_NICKNAME + DELIMITER + nickname + END_LINE);
+				sb.append(FIELDNAME_SESSIONKEY + DELIMITER + sessionKey + END_LINE);
+				sb.append(FIELDNAME_PORT + DELIMITER + port + END_LINE);
+			} else {
+				sb.append(FIELDNAME_REGISTEROK + DELIMITER +  registerOk + END_LINE);
+			}
+			break;
+		}
+		
+		case DirMessageOps.OPERATION_UNREGISTER_SERVER: {
+			// Si es un response, la variable nickname no estará inicializada
+			if (nickname != null) {
+				sb.append(FIELDNAME_NICKNAME + DELIMITER + nickname + END_LINE);
+				sb.append(FIELDNAME_SESSIONKEY + DELIMITER + sessionKey + END_LINE);
+			} else {
+				sb.append(FIELDNAME_UNREGISTEROK + DELIMITER + unregisterOk + END_LINE);
+			}
+			break;
+		}
 				
 		}
 	    sb.append(END_LINE); // Marcamos el final del mensaje

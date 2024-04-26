@@ -22,7 +22,6 @@ public class NFServerThread extends Thread {
         try {
 			NFServerComm.serveFilesToClient(clientSocket);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
     }

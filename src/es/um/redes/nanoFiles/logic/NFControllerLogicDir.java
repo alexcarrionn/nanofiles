@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
-import java.util.Arrays;
 import java.util.LinkedList;
+import java.util.Map;
 
 import es.um.redes.nanoFiles.application.NanoFiles;
 import es.um.redes.nanoFiles.udp.client.DirectoryConnector;
@@ -65,10 +65,10 @@ public class NFControllerLogicDir {
 		boolean result = false;
 		directoryConnector = new DirectoryConnector(directoryHostname); 
 		if(directoryConnector.logIntoDirectory(nickname)) {
-			System.out.println("logged in. Ok");
+			System.out.println("*logged in Ok");
 			result=true; 
 		}else {
-			System.out.println("logIntoDirectory ha devuelto error");
+			System.err.println("*logIntoDirectory ha devuelto error");
 		}
 
 
@@ -88,10 +88,10 @@ public class NFControllerLogicDir {
 		 */
 		boolean result = false; 
 		if(directoryConnector.logoutFromDirectory()) {
-			System.out.println("logged out Ok");
+			System.out.println("*logged out Ok");
 			result=true; 
 		}else {
-			System.err.println("Logged out ERROR");
+			System.err.println("*Logged out ERROR");
 		}
 
 
@@ -109,11 +109,19 @@ public class NFControllerLogicDir {
 		 * e imprimirla por pantalla. Devolver éxito/fracaso de la operación.
 		 */
 		boolean result = false;
-		System.out.println("Encontrando a los usuarios: ");
-		String[] users;
-		users = directoryConnector.getUserList();
-		String userslist = String.join(", ", users);
-		System.out.println("UserList: " + userslist);
+		System.out.println("*Encontrando a los usuarios: ");
+		Map<String, String[]> mapaUsuarios = directoryConnector.getUserList();
+		String[] users = mapaUsuarios.get("users");
+		String[] fileServers = mapaUsuarios.get("fileservers"); 
+		if(users != null) {
+			String userslist = String.join(", ", users);
+			System.out.println("*UserList: " + userslist);
+			if(fileServers.length > 0) {
+				String fileServerslist = String.join(", ", fileServers); 
+				System.out.println("*Users que son servidores: " + fileServerslist);
+			}
+		}
+		
 		result = true; 
 		
 		return result;
@@ -125,19 +133,15 @@ public class NFControllerLogicDir {
 	 * @throws IOException 
 	 */
 	protected boolean getAndPrintFileList() throws IOException {
-		/*
-		 * TODO: Obtener la lista de ficheros servidos. Comunicarse con el directorio (a
-		 * través del directoryConnector) para obtener la lista de ficheros e imprimirla
-		 * por pantalla (método FileInfo.printToSysout). Devolver éxito/fracaso de la
-		 * operación.
-		 */
-		boolean result = false;
-		FileInfo[] ficheros = directoryConnector.getFileList(); 
-		if(ficheros != null) {
-			result = true; 
-		}
-		
-		return result;
+	    boolean result = false;
+	    FileInfo[] ficheros = directoryConnector.getFileList();
+	    if (ficheros != null) {
+	        for (FileInfo file : ficheros) {
+	            System.out.println(file.fileName + " " + file.fileSize + " " + file.fileHash);
+	        }
+	        result = true;
+	    }
+	    return result;
 	}
 
 	/**
@@ -158,8 +162,14 @@ public class NFControllerLogicDir {
 		 */
 		boolean result = false;
 		result = directoryConnector.registerServerPort(serverPort); 
+		System.out.println("*Enviando registro al directorio...");
+		if(result) {
+			System.out.println("*Servidor conectado correctamente");
+		}
 		return result;
 	}
+	
+	
 
 	/**
 	 * Método para enviar al directorio la lista de ficheros que este peer servidor
@@ -179,9 +189,9 @@ public class NFControllerLogicDir {
 		FileInfo[] ficheros = NanoFiles.db.getFiles();
 		if(ficheros != null) {
 			result = directoryConnector.publishLocalFiles(ficheros);
-			System.out.println("Successfully published!");}
+			System.out.println("*Successfully published!");}
 		else {
-			System.err.println("No se han encontrado ficheros para publicar");
+			System.err.println("*No se han encontrado ficheros para publicar");
 		}
 		return result;
 	}
@@ -293,17 +303,22 @@ public class NFControllerLogicDir {
 	 * Método para dar de baja a nuestro servidor de ficheros en el directorio.
 	 * 
 	 * @return Éxito o fracaso de la operación
+	 * @throws IOException 
 	 */
-	public boolean unregisterFileServer() {
+	public boolean unregisterFileServer() throws IOException {
 		/*
 		 * TODO: Comunicarse con el directorio (a través del directoryConnector) para
 		 * darse de baja como servidor de ficheros. Se debe enviar la clave de sesión
 		 * para identificarse.
 		 */
-		boolean result = false;
-		
-
-
+		boolean result = false; 
+		result = directoryConnector.unregisterServer();
+		System.out.println("*Enviada la solicitud para darse de baja");
+		if(result) {
+			System.out.println("*Te has dado de baja correctamente");
+		}
+		else 
+			System.out.println("*No te has podido dar de baja");
 		return result;
 	}
 

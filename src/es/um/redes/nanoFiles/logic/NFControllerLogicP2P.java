@@ -1,13 +1,13 @@
 package es.um.redes.nanoFiles.logic;
 
 import java.io.File;
-import java.io.FileOutputStream;
+//import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.RandomAccessFile;
+//import java.io.RandomAccessFile;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.LinkedList;
-import java.util.Random;
+//import java.util.Random;
 
 import es.um.redes.nanoFiles.tcp.client.NFConnector;
 import es.um.redes.nanoFiles.tcp.server.NFServer;
@@ -20,7 +20,7 @@ public class NFControllerLogicP2P {
 	 * servidor de ficheros en segundo plano de este peer
 	 */
 	
-	//NFServerSimple serversimple; 
+	NFServerSimple serversimple; 
 	NFServer server;  
 	
 	protected NFControllerLogicP2P() {
@@ -32,17 +32,12 @@ public class NFControllerLogicP2P {
 	 * 
 	 */
 	protected void foregroundServeFiles() {
-		/*
-		 * TODO: Crear objeto servidor NFServerSimple y ejecutarlo en primer plano.
-		 */
-		
 		try {
-			/*serversimple = new NFServerSimple();
-			serversimple.run();*/
-			NFServerSimple server = new NFServerSimple(); 
-			server.run();
+			//Para hacer el fgserve lo hemos hecho a traves de NFSever Simple 
+			serversimple = new NFServerSimple(); 
+			serversimple.run();
 		} catch (IOException e) {
-			System.err.println("Excepcion de entrada/salida " + e.getMessage());
+			System.err.println("* Excepcion de entrada/salida " + e.getMessage());
 			e.printStackTrace();
 		} 
 		
@@ -65,32 +60,20 @@ public class NFControllerLogicP2P {
 	 * 
 	 */
 	protected boolean backgroundServeFiles() {
-		/*
-		 * TODO: Comprobar que no existe ya un objeto NFServer previamente creado, en
-		 * cuyo caso el servidor ya está en marcha. Si no lo está, crear objeto servidor
-		 * NFServer y arrancarlo en segundo plano creando un nuevo hilo. Finalmente,
-		 * comprobar que el servidor está escuchando en un puerto válido (>0) e imprimir
-		 * mensaje informando sobre el puerto, y devolver verdadero.
-		 */
-		/*
-		 * TODO: Las excepciones que puedan lanzarse deben ser capturadas y tratadas en
-		 * este método. Si se produce una excepción de entrada/salida (error del que no
-		 * es posible recuperarse), se debe informar sin abortar el programa
-		 */
 		
 		if(server == null) {
 			try {
 				server = new NFServer(); 
 			} catch (IOException e) {
-				System.err.println("Excepcion de entrada/salida " + e.getMessage());
+				System.err.println("* Excepcion de entrada/salida " + e.getMessage());
 				e.printStackTrace();
 			}
 			
 			server.startServer(); 
-			//return true;  
+			return true;  
 		}
 		else {
-			System.err.println("Ya hay un servidor activo");
+			System.err.println("* Ya hay un servidor activo");
 		}
 
 		return false;
@@ -125,7 +108,7 @@ public class NFControllerLogicP2P {
 	        // Intentar descargar el archivo
 	        if (connector.downloadFile(targetFileHash, downloadFile)) {
 	            result = true;
-	            System.out.println("File downloaded successfully: " + localFileName);
+	            System.out.println("* File downloaded successfully: " + localFileName);
 	        } else {
 	            System.err.println("* Failed to download file: " + localFileName);
 	        }
@@ -180,7 +163,7 @@ public class NFControllerLogicP2P {
 		 * TODO: Devolver el puerto de escucha de nuestro servidor de ficheros en
 		 * segundo plano
 		 */
-		port = server.getServerSocket().getLocalPort();  
+		port = server.getPort();  
 		return port;
 	}
 

@@ -2,7 +2,6 @@ package es.um.redes.nanoFiles.logic;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.util.Arrays;
 import java.util.LinkedList;
 
 import es.um.redes.nanoFiles.application.NanoFiles;
@@ -16,6 +15,7 @@ public class NFController {
 	 */
 	private static final byte LOGGED_OUT = 0;
 	private static final byte LOGGED_IN = 1;
+	private static final byte BGSERVE = 2; 
 	/*
 	 * TODO: Añadir más constantes que representen los estados del autómata del
 	 * cliente de directorio.
@@ -165,6 +165,8 @@ public class NFController {
 			boolean serverRunning = controllerPeer.backgroundServeFiles();
 			if (serverRunning) {
 				commandSucceeded = controllerDir.registerFileServer(controllerPeer.getServerPort());
+				if(commandSucceeded)
+					currentCommand = BGSERVE; 
 			}
 			break;
 		case NFCommands.COM_STOP_SERVER:
@@ -176,6 +178,8 @@ public class NFController {
 			 */
 			controllerPeer.stopBackgroundFileServer();
 			commandSucceeded = controllerDir.unregisterFileServer();
+			if(commandSucceeded)
+				currentCommand = LOGGED_IN; 
 			break;
 		case NFCommands.COM_DOWNLOADFROM:
 			/*
@@ -251,19 +255,19 @@ public class NFController {
 		case NFCommands.COM_LOGOUT:
 			if (currentState != LOGGED_IN) {
 				commandAllowed = false;
-				System.err.println("You can't log out because you're not logged in.");
+				System.err.println("* You can't log out because you're not logged in.");
 			}
 			break;
 		case NFCommands.COM_BGSERVE: 
 			if (currentState != LOGGED_IN) {
 				commandAllowed = false;
-				System.err.println("You can't Use the backGroundServer because you are not logged in");
+				System.err.println("* You can't Use the backGroundServer because you are not logged in");
 			}
 			break; 
 		case NFCommands.COM_USERLIST: 
 			if (currentState != LOGGED_IN) {
 				commandAllowed = false;
-				System.err.println("You can't view the userlist because you are not logged in");
+				System.err.println("* You can't view the userlist because you are not logged in");
 			}
 			break;
 		case NFCommands.COM_FGSERVE: 
@@ -273,21 +277,26 @@ public class NFController {
 		case NFCommands.COM_DOWNLOADFROM: 
 			if (currentState != LOGGED_IN) {
 				commandAllowed = false;
-				System.err.println("You can't Use downloadFrom because you are not logged in");
+				System.err.println("* You can't Use downloadFrom because you are not logged in");
 			}
 			break;
 		case NFCommands.COM_FILELIST: 
 			if (currentState != LOGGED_IN) {
 				commandAllowed = false;
-				System.err.println("You can't view the FileList because you are not logged in");
+				System.err.println("* You can't view the FileList because you are not logged in");
 			}
 			break;
 		case NFCommands.COM_PUBLISH: 
 			if (currentState != LOGGED_IN) {
 				commandAllowed = false;
-				System.err.println("You can't publish your's files because you are not logged in");
+				System.err.println("* You can't publish your's files because you are not logged in");
 			}
 			break;
+		/*case NFCommands.COM_STOP_SERVER: 
+			if(currentState != BGSERVE) {
+				commandAllowed = false;
+				System.err.println("* You can't use stopServer because there are no server runnig");
+			}*/
 		default:
 		}
 		return commandAllowed;
@@ -312,7 +321,7 @@ public class NFController {
 			currentState = LOGGED_OUT;
 			break;
 		}
-
+		
 		default:
 		}
 

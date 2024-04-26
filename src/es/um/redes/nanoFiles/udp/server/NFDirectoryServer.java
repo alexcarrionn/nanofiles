@@ -7,7 +7,6 @@ import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
 import java.net.SocketException;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.Random;
 
 import es.um.redes.nanoFiles.application.NanoFiles;
@@ -44,10 +43,10 @@ public class NFDirectoryServer {
 	 * funcionalidad del sistema nanoFilesP2P: ficheros publicados, servidores
 	 * registrados, etc.
 	 */
-
-	private HashMap<String, InetSocketAddress> clientsAddresses;
- 
-
+	private HashMap<String, InetSocketAddress> users;
+	private HashMap<String, InetSocketAddress> fileServers;
+	
+	
 	/**
 	 * Generador de claves de sesión aleatorias (sessionKeys)
 	 */
@@ -79,9 +78,9 @@ public class NFDirectoryServer {
 		 */
 		nicks = new HashMap<>(); 
 		sessionKeys = new HashMap<>();
-		clientsAddresses = new HashMap<>(); 
+		users = new HashMap<>(); 
+		fileServers = new HashMap<>(); 
 		
-
 		if (NanoFiles.testMode) {
 			if (socket == null || nicks == null || sessionKeys == null) {
 				System.err.println("[testMode] NFDirectoryServer: code not yet fully functional.\n"
@@ -109,12 +108,12 @@ public class NFDirectoryServer {
 
 		while (true) { // Bucle principal del servidor de directorio
 
-			// TODO: (Boletín UDP) Recibimos a través del socket un datagrama
+			// Recibimos a través del socket un datagrama
 			socket.receive(packetFromClient);
-			// TODO: (Boletín UDP) Establecemos dataLength con longitud del datagrama
+			//Establecemos dataLength con longitud del datagrama
 			// recibido
 			dataLength = packetFromClient.getLength();
-			// TODO: (Boletín UDP) Establecemos 'clientAddr' con la dirección del cliente,
+			// Establecemos 'clientAddr' con la dirección del cliente,
 			// obtenida del
 			// datagrama recibido
 			clientAddr = (InetSocketAddress) packetFromClient.getSocketAddress();
@@ -134,10 +133,7 @@ public class NFDirectoryServer {
 			// Analizamos la solicitud y la procesamos
 			if (dataLength > 0) {
 				String messageFromClient = null;
-				/*
-				 * TODO: (Boletín UDP) Construir una cadena a partir de los datos recibidos en
-				 * el buffer de recepción
-				 */
+				
 				messageFromClient = new String(receptionBuffer, 0, packetFromClient.getLength());
 
 
@@ -148,7 +144,7 @@ public class NFDirectoryServer {
 				}else {
 					DirMessage op = DirMessage.fromString(messageFromClient);
 					/*
-					 * TODO: Llamar a buildResponseFromRequest para construir, a partir del objeto
+					 * Llamar a buildResponseFromRequest para construir, a partir del objeto
 					 * DirMessage con los valores del mensaje de petición recibido, un nuevo objeto
 					 * DirMessage con el mensaje de respuesta a enviar. Los atributos del objeto
 					 * DirMessage de respuesta deben haber sido establecidos con los valores
@@ -157,7 +153,7 @@ public class NFDirectoryServer {
 					DirMessage response = buildResponseFromRequest(op, clientAddr);
 					
 					/*
-					 * TODO: Convertir en string el objeto DirMessage con el mensaje de respuesta a
+					 * Convertir en string el objeto DirMessage con el mensaje de respuesta a
 					 * enviar, extraer los bytes en que se codifica el string (getBytes), y
 					 * finalmente enviarlos en un datagrama
 					 */
@@ -166,7 +162,7 @@ public class NFDirectoryServer {
 					DatagramPacket packetToClient = new DatagramPacket (sendData, sendData.length, clientAddr);
 					
 					socket.send(packetToClient);
-					//System.out.println("Sending message to client \"" + new String(sendData) + "\"");
+					System.out.println("Sending message to client " + new String(sendData));
 				}
 			} else {
 				System.err.println("Directory ignores EMPTY datagram from " + clientAddr);
@@ -177,7 +173,7 @@ public class NFDirectoryServer {
 
 	private DirMessage buildResponseFromRequest(DirMessage msg, InetSocketAddress clientAddr) {
 		/*
-		 * TODO: Construir un DirMessage con la respuesta en función del tipo de mensaje
+		 * Construir un DirMessage con la respuesta en función del tipo de mensaje
 		 * recibido, leyendo/modificando según sea necesario los atributos de esta clase
 		 * (el "estado" guardado en el directorio: nicks, sessionKeys, servers,
 		 * files...)
@@ -194,7 +190,8 @@ public class NFDirectoryServer {
 
 			if(!nicks.containsKey(username)) {
 				int sessionKey = random.nextInt(10000);
-				nicks.put(username, sessionKey); 
+				nicks.put(username, sessionKey);
+				users.put(username, clientAddr); 
 				sessionKeys.put(sessionKey, username); 
 				response= new DirMessage(DirMessageOps.OPERATION_LOGIN );
 				response.setSessionKey(sessionKey); 
@@ -214,6 +211,7 @@ public class NFDirectoryServer {
 			int sessionKey = nicks.get(username);
 			nicks.remove(username);
 			sessionKeys.remove(sessionKey);
+			users.remove(username); 
 			
 			response = new DirMessage(DirMessageOps.OPERATION_LOGIN_OUT);
 			response.setLogout(true);
@@ -224,12 +222,14 @@ public class NFDirectoryServer {
 		case DirMessageOps.OPERATION_USER_LIST:{ 
 			response = new DirMessage(DirMessageOps.OPERATION_USER_LIST);
 			String[] keysArray = nicks.keySet().toArray(new String[0]); 
-			response.setUsers(keysArray); 
+			String[] filesServer = fileServers.keySet().toArray(new String[0]);
+			response.setUsers(keysArray);
+			response.setFilesServer(filesServer); 
 			break; 
 		}
 		case DirMessageOps.OPERATION_FILE_LIST: {
 		    response = new DirMessage(DirMessageOps.OPERATION_FILE_LIST);
-		    String sharedFolderPath = new File("nf-shared").getAbsolutePath();
+		    String sharedFolderPath = new File(NanoFiles.sharedDirname).getAbsolutePath();
 		    File sharedFolder = new File(sharedFolderPath);
 		    FileInfo[] files = null;
 		    if (sharedFolder.exists() && sharedFolder.isDirectory()) {
@@ -241,23 +241,23 @@ public class NFDirectoryServer {
 
 		case DirMessageOps.OPERATION_PUBLISH: {
 		    // Obtener la ruta completa de la carpeta compartida
-		    String sharedFolderPath = "nf-shared"; 
+		    String sharedFolderPath = NanoFiles.sharedDirname; 
 		    // Obtener la lista de archivos en la carpeta compartida en nuestro caso nf-shared
 		    File sharedFolder = new File(sharedFolderPath);
 		    FileInfo[] files = null;
 		    if (sharedFolder.exists() && sharedFolder.isDirectory()) {
 		        files = FileInfo.loadFilesFromFolder(sharedFolderPath);
 		    } else {
-		        System.err.println("La carpeta compartida no existe o no es una carpeta válida.");
+		        System.err.println("* La carpeta compartida no existe o no es una carpeta válida.");
 		    }
 
 		    if (files != null && files.length > 0) {
-		        System.out.println("Archivos publicados:");
+		        System.out.println("* Archivos publicados:");
 		        for (FileInfo file : files) {
-		            System.out.println("- " + file);
+		            System.out.println("*- " + file);
 		        }
 		    } else {
-		        System.out.println("No se han encontrado archivos para publicar en la carpeta compartida.");
+		        System.out.println("* No se han encontrado archivos para publicar en la carpeta compartida.");
 		    }
 
 		    // Construir un mensaje de respuesta indicando si la publicación fue exitosa
@@ -265,6 +265,32 @@ public class NFDirectoryServer {
 		    // Aquí lo que se hace es poner la respuesta del Publish a true en el caso en el que encuentre algún fichero compatible
 		    response.setPublishResponse(files != null && files.length > 0); 
 		    break;
+		}
+		
+		case DirMessageOps.OPERATION_REGISTER_FILE_SERVER:{
+			System.out.println("* Solicitud de Servidores de ficheros enviada por "+ clientAddr);
+			response = new DirMessage(DirMessageOps.OPERATION_REGISTER_FILE_SERVER);
+			
+			String username = msg.getNickname();
+			int port = msg.getPort(); 
+			InetSocketAddress server = new InetSocketAddress(clientAddr.getAddress(), port);
+			if(!fileServers.containsKey(username)) {
+				fileServers.put(username, server); 
+				response.setRegisterOk(true);
+			}
+			break; 
+			
+		}
+		
+		case DirMessageOps.OPERATION_UNREGISTER_SERVER:{
+			System.out.println("* Solicitud de cerrar servidor de ficheros enviada por: " + clientAddr);
+			response = new DirMessage(DirMessageOps.OPERATION_UNREGISTER_SERVER); 
+			String username = msg.getNickname(); 
+			if(fileServers.containsKey(username)) {
+				fileServers.remove(username); 
+				response.setUnregisterOk(true);
+			}
+			break; 
 		}
 
         

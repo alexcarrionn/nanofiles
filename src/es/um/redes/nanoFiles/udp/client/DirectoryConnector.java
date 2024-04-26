@@ -5,15 +5,17 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.SocketAddress;
+//import java.net.SocketAddress;
 import java.net.SocketTimeoutException;
 import java.util.Arrays;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.HashMap;
+import java.util.Map;
+/*import java.util.regex.Matcher;
+import java.util.regex.Pattern;*/
 
 import es.um.redes.nanoFiles.udp.message.DirMessage;
 import es.um.redes.nanoFiles.udp.message.DirMessageOps;
-import es.um.redes.nanoFiles.udp.server.NFDirectoryServer;
+//import es.um.redes.nanoFiles.udp.server.NFDirectoryServer;
 import es.um.redes.nanoFiles.util.FileInfo;
 
 /**
@@ -55,19 +57,16 @@ public class DirectoryConnector {
 	public final static int MAX_MSG_SIZE_BYTES = 32;
 
 	private int sessionKey = INVALID_SESSION_KEY;
-	private boolean successfulResponseStatus;
-	private String errorDescription;
+	//private boolean successfulResponseStatus;
+	//private String errorDescription;
 	private String username; 
-	private FileInfo[] ficheros; 
 	
 	public DirectoryConnector(String address) throws IOException {
 
 		InetAddress serverIp = InetAddress.getByName(address);
 		this.directoryAddress = new InetSocketAddress(serverIp, DIRECTORY_PORT);
 		socket = new DatagramSocket();
-		System.out.println("Created UDP socket at local addresss " + socket.getLocalSocketAddress());
-
-
+		//System.out.println("Created UDP socket at local addresss " + socket.getLocalSocketAddress());
 	}
 
 
@@ -99,7 +98,7 @@ public class DirectoryConnector {
 
 		DatagramPacket packetToServer = new DatagramPacket(requestData, requestData.length, directoryAddress);
 		socket.send(packetToServer);
-		System.out.println("Sending message to server: " + new String(requestData) );
+		//System.out.println("Sending message to server: " + new String(requestData) );
 		
 		DatagramPacket packetFromServer = new DatagramPacket(responseData,responseData.length);
 		
@@ -109,8 +108,8 @@ public class DirectoryConnector {
 			try {
 				socket.receive(packetFromServer);
 				response = Arrays.copyOfRange(responseData, 0, packetFromServer.getLength());
-				SocketAddress responseAddr = packetFromServer.getSocketAddress();
-				System.out.println("Datagram received from server at addr " + responseAddr);
+				//SocketAddress responseAddr = packetFromServer.getSocketAddress();
+				//System.out.println("Datagram received from server at addr " + responseAddr);
 				break; 
 		}catch (SocketTimeoutException e) {
 			System.out.println("socket.receive() reachered TIMEOUT. " + (MAX_NUMBER_OF_ATTEMPTS-i) + " attemps remaining.");
@@ -136,14 +135,7 @@ public class DirectoryConnector {
 	 * @return verdadero si se ha enviado un datagrama y recibido una respuesta
 	 * @throws IOException 
 	 */
-	public boolean testSendAndReceive() throws IOException {
-		/*
-		 * TODO: Probar el correcto funcionamiento de sendAndReceiveDatagrams. Se debe
-		 * enviar un datagrama con la cadena "login" y comprobar que la respuesta
-		 * recibida es "loginok". En tal caso, devuelve verdadero, falso si la respuesta
-		 * no contiene los datos esperados.
-		 */
-		
+	public boolean testSendAndReceive() throws IOException {		
 		boolean success = false;
 		String dato = "login"; 
 		String loginok = "loginok"; 
@@ -212,16 +204,19 @@ public class DirectoryConnector {
 	 *         no pudo satisfacer nuestra solicitud
 	 * @throws IOException 
 	 */
-	public String[] getUserList() throws IOException {
-		String[] userlist = null;
-		// TODO: Ver TODOs en logIntoDirectory y seguir esquema similar
+	public Map<String, String[]> getUserList() throws IOException {
+		Map<String, String[]> resultMap = new HashMap<>();
 		DirMessage m = new DirMessage(DirMessageOps.OPERATION_USER_LIST); 
+		m.setNickname(username);
+		m.setSessionKey(sessionKey);
+		
 		String messageUserList = m.toString(); 
 		byte[] sendData = messageUserList.getBytes(); 
 		byte[] response = sendAndReceiveDatagrams(sendData); 
 		DirMessage r = DirMessage.fromString(new String(response));
-		userlist = r.getUsers(); 
-		return userlist;
+		resultMap.put("users", r.getUsers());
+        resultMap.put("fileservers",r.getFilesServer()); 
+		return resultMap;
 	}
 
 	/**
@@ -261,10 +256,9 @@ public class DirectoryConnector {
 	    boolean success = false;
 	    try {
 	        // Crear un mensaje de solicitud de registro de servidor
-	        DirMessage registerMessage = new DirMessage(DirMessageOps.OPERATION_PORT_REGISTER);
-	        registerMessage.setServerPort(serverPort);
-	        registerMessage.setSessionKey(sessionKey); // Añadir la clave de sesión para identificación
-	        registerMessage.setNickname(username);
+	        DirMessage registerMessage = new DirMessage(DirMessageOps.OPERATION_REGISTER_FILE_SERVER);
+	        registerMessage.setPort(serverPort);
+	        registerMessage.setNickname(this.getUsername());
 	        // Convertir el mensaje a una cadena de bytes
 	        byte[] requestData = registerMessage.toString().getBytes();
 	        // Enviar el mensaje al directorio y recibir la respuesta
@@ -272,12 +266,8 @@ public class DirectoryConnector {
 	        
 	        // Convertir la respuesta a un objeto DirMessage
 	        DirMessage responseMessage = DirMessage.fromString(new String(responseData));
-	        int port = responseMessage.getServerPort(); 
-	        // Verificar si la operación fue exitosa en la respuesta recibida
-	        if(port != 0) {
-	        	success = true;
-	        }
-	        
+	       
+	        success = responseMessage.isRegisterOk();  
 	        
 	    } catch (IOException e) {
 	        e.printStackTrace();
@@ -285,6 +275,21 @@ public class DirectoryConnector {
 	    return success;
 	}
 
+	public boolean unregisterServer() throws IOException {
+		
+		boolean success = false;
+		DirMessage m = new DirMessage(DirMessageOps.OPERATION_UNREGISTER_SERVER);
+		m.setNickname(this.getUsername());
+		m.setSessionKey(this.getSessionKey());
+		
+		byte[] sendData = m.toString().getBytes();
+		
+		byte[] response = sendAndReceiveDatagrams(sendData);
+		DirMessage r = DirMessage.fromString(new String(response));
+		
+		success = r.isUnregisterOk();
+		return success;
+	}
 
 	/**
 	 * Método para obtener del directorio la dirección de socket (IP:puerto)

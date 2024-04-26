@@ -15,8 +15,11 @@ public class DirMessageOps {
 	public static final String OPERATION_FGSERVE = "fgserve";
 	public static final String OPERATION_FILE_LIST = "FileList";
 	public static final String OPERATION_PUBLISH = "Publish";
-	public static final String OPERATION_PORT_REGISTER = "PortRegister";
-	public static final String OPERATION_PUBLISH_RESPONSE = "Publish_response"; 
+	public static final String OPERATION_REGISTER_FILE_SERVER = "RegisterOk";
+	public static final String OPERATION_PUBLISH_RESPONSE = "Publish_response";
+	public static final String OPERATION_UNREGISTER_SERVER = "UnregisterServer";
+	
+	
 	
 
 }

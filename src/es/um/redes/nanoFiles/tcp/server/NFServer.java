@@ -13,9 +13,18 @@ import java.net.SocketTimeoutException;
 public class NFServer implements Runnable {
 
 	private ServerSocket serverSocket = null;
+	
 	private boolean stopServer = false;
-	private static final int SERVERSOCKET_ACCEPT_TIMEOUT_MILISECS = 1000;
+	//private static final int SERVERSOCKET_ACCEPT_TIMEOUT_MILISECS = 1000;
+	private Socket socket;
+	private int port; 
+	
+	
+	public int getPort() {
+		return port;
+	}
 
+	
 	public ServerSocket getServerSocket() {
 		return serverSocket;
 	}
@@ -26,8 +35,8 @@ public class NFServer implements Runnable {
 	    //serverSocket.setSoTimeout(SERVERSOCKET_ACCEPT_TIMEOUT_MILISECS);
 	    serverSocket.setReuseAddress(true);
 	    serverSocket.bind(serverSocketAddress);
-
-	    System.out.println("BackgroundServer operando en el puerto " + serverSocket.getLocalPort());
+	    port = serverSocket.getLocalPort(); 
+	    System.out.println("*BackgroundServer operando en el puerto " + port);
 	}
 
 	/**
@@ -37,7 +46,7 @@ public class NFServer implements Runnable {
 	 * @see java.lang.Runnable#run()
 	 */
 	public void run() {
-	    Socket socket = null;
+	    socket = null;
 	    while (!stopServer) {
 	        try {
 	            socket = serverSocket.accept();
@@ -77,15 +86,15 @@ public class NFServer implements Runnable {
 	        try {
 	        	
 	            serverSocket.close();
-	            System.out.println("Servidor detenido.");
+	            System.out.println("*Servidor detenido.");
 	        } catch (IOException e) {
-	            System.err.println("Error al detener el servidor: " + e.getMessage());
+	            System.err.println("*Error al detener el servidor: " + e.getMessage());
 	            e.printStackTrace();
 	        }
 	}
 	
-	public int obtenerPuertoEscucha(Socket serverSocketAddress) {
-		return serverSocketAddress.getPort(); 
+	public Socket getSocket() {
+		return socket;
 	}
 
 }
