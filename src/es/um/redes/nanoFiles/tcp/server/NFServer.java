@@ -36,7 +36,7 @@ public class NFServer implements Runnable {
 	    serverSocket.setReuseAddress(true);
 	    serverSocket.bind(serverSocketAddress);
 	    port = serverSocket.getLocalPort(); 
-	    System.out.println("*BackgroundServer operando en el puerto " + port);
+	    System.out.println("* BackgroundServer operando en el puerto " + port);
 	}
 
 	/**
@@ -86,9 +86,9 @@ public class NFServer implements Runnable {
 	        try {
 	        	
 	            serverSocket.close();
-	            System.out.println("*Servidor detenido.");
+	            System.out.println("* Servidor detenido.");
 	        } catch (IOException e) {
-	            System.err.println("*Error al detener el servidor: " + e.getMessage());
+	            System.err.println("* Error al detener el servidor: " + e.getMessage());
 	            e.printStackTrace();
 	        }
 	}

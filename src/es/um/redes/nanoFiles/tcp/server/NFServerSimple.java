@@ -53,7 +53,7 @@ public class NFServerSimple {
 				/*
 				 * TODO: Comprobar que el socket servidor está creado y ligado
 				 */
-				System.out.println("Servidor en el puerto : "
+				System.out.println("* Servidor en el puerto : "
 						+ serverSocket.getLocalPort());
 				/*
 				 * TODO: Usar el socket servidor para esperar conexiones de otros peers que

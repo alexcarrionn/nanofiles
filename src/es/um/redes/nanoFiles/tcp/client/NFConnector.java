@@ -67,21 +67,21 @@ public class NFConnector {
 	                fos.close();
 	                downloaded = true;
 	            } else {
-	                System.err.println("El mensaje del servidor no contiene datos para descargar.");
+	                System.err.println("* El mensaje del servidor no contiene datos para descargar.");
 	                downloaded = false;
 	            }
 	            // Verifica la integridad del archivo descargado
 	            String newHash = FileDigest.computeFileChecksumString(file.getAbsolutePath());
 	            if (!newHash.contains(targetFileHashSubstr)) {
-	                System.err.println("El archivo descargado está corrupto.");
+	                System.err.println("* El archivo descargado está corrupto.");
 	                downloaded = false;
 	            }
 	        } else {
-	            System.err.println("El servidor no ha iniciado la descarga del archivo.");
+	            System.err.println("* El servidor no ha iniciado la descarga del archivo.");
 	            downloaded = false;
 	        }
 	    } catch (IOException e) {
-	        System.err.println("Error durante la descarga del archivo: " + e.getMessage());
+	        System.err.println("* Error durante la descarga del archivo: " + e.getMessage());
 	        throw e;
 	    }
 

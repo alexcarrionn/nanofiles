@@ -185,13 +185,13 @@ public class DirectoryConnector {
 		int num = r.getSessionKey();
 		
 		if (loginok && num <= 10000) {
-            System.out.println("SessionKey: " + num);
+            System.out.println("* SessionKey: " + num);
             sessionKey = num;
             success = true;
             return success;
         }
 		
-		System.err.println("Usuario ya registrado");
+		System.err.println("* Usuario ya registrado");
 		return success;
 	}
 		
@@ -214,8 +214,8 @@ public class DirectoryConnector {
 		byte[] sendData = messageUserList.getBytes(); 
 		byte[] response = sendAndReceiveDatagrams(sendData); 
 		DirMessage r = DirMessage.fromString(new String(response));
-		resultMap.put("users", r.getUsers());
-        resultMap.put("fileservers",r.getFilesServer()); 
+		resultMap.put("* users", r.getUsers());
+        resultMap.put("* fileservers",r.getFilesServer()); 
 		return resultMap;
 	}
 
