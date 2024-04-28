@@ -178,7 +178,6 @@ public class NFControllerLogicP2P {
 		/*
 		 * Envia una señal para detener nuestro servidor de ficheros en segundo plano
 		 */
-		
 		server.stopserver();
 		server = null; 
 	}

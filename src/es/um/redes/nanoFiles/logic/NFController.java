@@ -164,8 +164,7 @@ public class NFController {
 			 */
 			boolean serverRunning = controllerPeer.backgroundServeFiles();
 			if (serverRunning) 
-				commandSucceeded = controllerDir.registerFileServer(controllerPeer.getServerPort());
-			updateCurrentState(commandSucceeded); 
+				commandSucceeded = controllerDir.registerFileServer(controllerPeer.getServerPort()); 
 			break;
 		case NFCommands.COM_STOP_SERVER:
 			/*
@@ -267,8 +266,9 @@ public class NFController {
 				System.err.println("* You can't view the userlist because you are not logged in");
 			}
 			break;
-		case NFCommands.COM_FGSERVE: 
-				commandAllowed = true;
+		case NFCommands.COM_FGSERVE:
+			if (currentState != LOGGED_IN && currentState != LOGGED_OUT) {
+				commandAllowed = true;}
 			break;
 			
 		case NFCommands.COM_DOWNLOADFROM: 
