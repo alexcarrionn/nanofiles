@@ -66,7 +66,6 @@ public class DirectoryConnector {
 		InetAddress serverIp = InetAddress.getByName(address);
 		this.directoryAddress = new InetSocketAddress(serverIp, DIRECTORY_PORT);
 		socket = new DatagramSocket();
-		//System.out.println("Created UDP socket at local addresss " + socket.getLocalSocketAddress());
 	}
 
 
@@ -99,7 +98,6 @@ public class DirectoryConnector {
 		DatagramPacket packetToServer = new DatagramPacket(requestData, requestData.length, directoryAddress);
 		
 		socket.send(packetToServer);
-		//System.out.println("Sending message to server: " + new String(requestData) );
 		
 		DatagramPacket packetFromServer = new DatagramPacket(responseData,responseData.length);
 		
@@ -109,8 +107,7 @@ public class DirectoryConnector {
 			try {
 				socket.receive(packetFromServer);
 				response = Arrays.copyOfRange(responseData, 0, packetFromServer.getLength());
-				//SocketAddress responseAddr = packetFromServer.getSocketAddress();
-				//System.out.println("Datagram received from server at addr " + responseAddr);
+				
 				break; 
 		}catch (SocketTimeoutException e) {
 			System.out.println("socket.receive() reachered TIMEOUT. " + (MAX_NUMBER_OF_ATTEMPTS-i) + " attemps remaining.");
@@ -206,15 +203,20 @@ public class DirectoryConnector {
 	 * @throws IOException 
 	 */
 	public Map<String, String[]> getUserList() throws IOException {
+		//creamos un mapa para poner la lista de usuarios y usuarios que son servidores de ficheros
 		Map<String, String[]> resultMap = new HashMap<>();
-		DirMessage m = new DirMessage(DirMessageOps.OPERATION_USER_LIST); 
+		//creamos el mensaje
+		DirMessage m = new DirMessage(DirMessageOps.OPERATION_USER_LIST);
+		//modificamos los valores
 		m.setNickname(username);
 		m.setSessionKey(sessionKey);
 		
 		String messageUserList = m.toString(); 
 		byte[] sendData = messageUserList.getBytes(); 
+		//recibimos respuesta
 		byte[] response = sendAndReceiveDatagrams(sendData); 
 		DirMessage r = DirMessage.fromString(new String(response));
+		//ponemos en el mapa los usuarios y usuarios que son servidores de ficheros que hemos recibido 
 		resultMap.put("users", r.getUsers());
         resultMap.put("fileservers",r.getFilesServer()); 
 		return resultMap;
@@ -280,15 +282,16 @@ public class DirectoryConnector {
 	public boolean unregisterServer() throws IOException {
 		
 		boolean success = false;
+		//enviamos un mensaje al servidor para darnos de baja como servidor de ficheros
 		DirMessage m = new DirMessage(DirMessageOps.OPERATION_UNREGISTER_SERVER);
+		//quitamos el nombre y la session key de los respectivos mapas
 		m.setNickname(this.getUsername());
 		m.setSessionKey(this.getSessionKey());
-		
 		byte[] sendData = m.toString().getBytes();
-		
+		//Obtenemos respuesta
 		byte[] response = sendAndReceiveDatagrams(sendData);
 		DirMessage r = DirMessage.fromString(new String(response));
-		
+		//ponemos en success si ha sido posible o no
 		success = r.isUnregisterOk();
 		return success;
 	}
@@ -305,20 +308,21 @@ public class DirectoryConnector {
 	 */
 	public InetSocketAddress lookupServerAddrByUsername(String nick) throws IOException {
 		InetSocketAddress serverAddr = null;
-		// TODO: Ver TODOs en logIntoDirectory y seguir esquema similar
 		
+		//Creamos el mensaje para enviarselo al servidor
 		DirMessage m = new DirMessage(DirMessageOps.OPERATION_REQUEST_IP);
 		m.setNickname(nick);
 		
 		String messageRequest = m.toString();
 		
 		byte[] sendData = messageRequest.getBytes();
-		
+		//recibimos la respues del servidor
 		byte[] response = sendAndReceiveDatagrams(sendData);
 		DirMessage r = DirMessage.fromString(new String(response));
-		
+		//Recibimos la ip y el puerto en el que se encuentra el servidor Peer de ficheros
 		InetAddress ip = r.getIprequest(); 
 		int port = r.getPort(); 
+		//Creamos una direccion con el puerto y la Ip que nos han llegado
 		serverAddr = new InetSocketAddress(ip,port); 
 		
 		return serverAddr;
@@ -380,11 +384,14 @@ public class DirectoryConnector {
 	public FileInfo[] getFileList() {
 	    FileInfo[] filelist = null;
 	    try {
+	    	//creamos el mensaje para pedirle la lista de ficheros al servidpr
 	        DirMessage m = new DirMessage(DirMessageOps.OPERATION_FILE_LIST);
 	        String messageFileList = m.toString();
 	        byte[] sendData = messageFileList.getBytes();
+	        //Recibimos la respuesta
 	        byte[] response = sendAndReceiveDatagrams(sendData);
 	        DirMessage r = DirMessage.fromString(new String(response));
+	        //obtenemos los ficheros
 	        filelist = r.getFiles();
 	    } catch (IOException e) {
 	        // Maneja la excepción de comunicación con el servidor

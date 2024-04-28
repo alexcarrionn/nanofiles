@@ -16,7 +16,7 @@ import es.um.redes.nanoFiles.tcp.server.NFServerSimple;
 
 public class NFControllerLogicP2P {
 	/*
-	 * TODO: Para bgserve, se necesita un atributo NFServer que actuará como
+	 * Para bgserve, se necesita un atributo NFServer que actuará como
 	 * servidor de ficheros en segundo plano de este peer
 	 */
 	
@@ -35,6 +35,7 @@ public class NFControllerLogicP2P {
 		try {
 			//Para hacer el fgserve lo hemos hecho a traves de NFSever Simple 
 			serversimple = new NFServerSimple(); 
+			//runeamos el serversimple
 			serversimple.run();
 		} catch (IOException e) {
 			System.err.println("* Excepcion de entrada/salida " + e.getMessage());
@@ -42,7 +43,7 @@ public class NFControllerLogicP2P {
 		} 
 		
 		/*
-		 * TODO: Las excepciones que puedan lanzarse deben ser capturadas y tratadas en
+		 * Las excepciones que puedan lanzarse deben ser capturadas y tratadas en
 		 * este método. Si se produce una excepción de entrada/salida (error del que no
 		 * es posible recuperarse), se debe informar sin abortar el programa
 		 */
@@ -60,15 +61,16 @@ public class NFControllerLogicP2P {
 	 * 
 	 */
 	protected boolean backgroundServeFiles() {
-		
+		//para el bgserve lo primero que hacemos es comprobar que solo haya uno en ejecucion 
 		if(server == null) {
 			try {
+				//una vez que hemos visto que es null, lo creamos
 				server = new NFServer(); 
 			} catch (IOException e) {
 				System.err.println("* Excepcion de entrada/salida " + e.getMessage());
 				e.printStackTrace();
 			}
-			
+			//y lo runeamos a partir de hilos
 			server.startServer(); 
 			return true;  
 		}
@@ -91,6 +93,7 @@ public class NFControllerLogicP2P {
 	protected boolean downloadFileFromSingleServer(InetSocketAddress fserverAddr, String targetFileHash,
 	        String localFileName) throws UnknownHostException, IOException {
 	    boolean result = false;
+	    //comprobamos que haya algun servidor
 	    if (fserverAddr == null) {
 	        System.err.println("* Cannot start download - No server address provided");
 	        return false;
@@ -160,7 +163,7 @@ public class NFControllerLogicP2P {
 	public int getServerPort() {
 		int port = 0;
 		/*
-		 * TODO: Devolver el puerto de escucha de nuestro servidor de ficheros en
+		 * Devuelve el puerto de escucha de nuestro servidor de ficheros en
 		 * segundo plano
 		 */
 		port = server.getPort();  
@@ -173,7 +176,7 @@ public class NFControllerLogicP2P {
 	 */
 	public void stopBackgroundFileServer() {
 		/*
-		 * TODO: Enviar señal para detener nuestro servidor de ficheros en segundo plano
+		 * Envia una señal para detener nuestro servidor de ficheros en segundo plano
 		 */
 		
 		server.stopserver();

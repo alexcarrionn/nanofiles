@@ -1,7 +1,7 @@
 package es.um.redes.nanoFiles.udp.message;
 
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
+//import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 /*import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -56,7 +56,7 @@ public class DirMessage {
 	 */
 	private String operation = DirMessageOps.OPERATION_INVALID;
 	/*
-	 * TODO: Crear un atributo correspondiente a cada uno de los campos de los
+	 * Crear un atributo correspondiente a cada uno de los campos de los
 	 * diferentes mensajes de este protocolo.
 	 */
 	private String nickname;
@@ -71,6 +71,7 @@ public class DirMessage {
 	private boolean unregisterOk; 
 	private boolean registerOk; 
 	private InetAddress iprequest;
+	
 	//atributos del mensaje con el getUser una lista, aqui poner una lista 
 
 	public DirMessage(String op) {
@@ -213,13 +214,11 @@ public class DirMessage {
 	 */
 	public static DirMessage fromString(String message) throws UnknownHostException {
 		/*
-		 * TODO: Usar un bucle para parsear el mensaje línea a línea, extrayendo para
+		 * Usar un bucle para parsear el mensaje línea a línea, extrayendo para
 		 * cada línea el nombre del campo y el valor, usando el delimitador DELIMITER, y
 		 * guardarlo en variables locales.
 		 */
-
-		//System.out.println("DirMessage read from socket:");
-		//System.out.println(message);
+		
 		String[] lines = message.split(END_LINE + "");
 		// Local variables to save data during parsing
 		DirMessage m = null;
@@ -424,9 +423,11 @@ public class DirMessage {
 		case DirMessageOps.OPERATION_UNREGISTER_SERVER: {
 			// Si es un response, la variable nickname no estará inicializada
 			if (nickname != null) {
+				//pongo en el buffer nickname y sessionKey
 				sb.append(FIELDNAME_NICKNAME + DELIMITER + nickname + END_LINE);
 				sb.append(FIELDNAME_SESSIONKEY + DELIMITER + sessionKey + END_LINE);
 			} else {
+				//pongo en el buffer unregisterOk
 				sb.append(FIELDNAME_UNREGISTEROK + DELIMITER + unregisterOk + END_LINE);
 			}
 			break;
@@ -434,8 +435,10 @@ public class DirMessage {
 		case DirMessageOps.OPERATION_REQUEST_IP: {
 			// Si es un response, la variable nickname no estará inicializada
 			if (nickname != null) {
+				//se pone el nickname
 				sb.append(FIELDNAME_NICKNAME + DELIMITER + nickname + END_LINE);
 			} else {
+				//pongo el iprequest y el puerto
 				sb.append(FIELDNAME_REQUEST_IP + DELIMITER + iprequest.toString() + END_LINE);
 				sb.append(FIELDNAME_PORT + DELIMITER + port + END_LINE);
 			}

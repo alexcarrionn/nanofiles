@@ -1,13 +1,12 @@
 package es.um.redes.nanoFiles.tcp.server;
 
-import java.io.BufferedInputStream;
+//import java.io.BufferedInputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.RandomAccessFile;
+//import java.io.RandomAccessFile;
 import java.net.Socket;
 
 import es.um.redes.nanoFiles.application.NanoFiles;
@@ -19,14 +18,14 @@ public class NFServerComm {
 
 	public static void serveFilesToClient(Socket socket) throws IOException {
 		/*
-		 * TODO: Crear dis/dos a partir del socket
+		 * Crear dis/dos a partir del socket
 		 */
 
 		DataInputStream dis = new DataInputStream(socket.getInputStream());
 		DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
 
 		/*
-		 * TODO: Mientras el cliente esté conectado, leer mensajes de socket,
+		 * Mientras el cliente esté conectado, leer mensajes de socket,
 		 * convertirlo a un objeto PeerMessage y luego actuar en función del tipo de
 		 * mensaje recibido, enviando los correspondientes mensajes de respuesta.
 		 */
@@ -66,6 +65,7 @@ public class NFServerComm {
 					fis.close(); 
 
 				}
+				//cerramos dis y dos
 				dis.close();
 				dos.close();
 				break;

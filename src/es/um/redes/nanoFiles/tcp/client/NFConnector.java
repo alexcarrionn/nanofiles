@@ -35,7 +35,6 @@ public class NFConnector {
 	public NFConnector(InetSocketAddress fserverAddr) throws UnknownHostException, IOException {
 			serverAddr = fserverAddr;
 	        socket = new Socket(serverAddr.getAddress(),serverAddr.getPort());
-	        //socket.connect(new InetSocketAddress(serverAddr.getAddress(), serverAddr.getPort()));
 	        if (socket.isConnected()) {
 	            System.out.println("Conexión TCP establecida.");
 	            dis = new DataInputStream(socket.getInputStream());

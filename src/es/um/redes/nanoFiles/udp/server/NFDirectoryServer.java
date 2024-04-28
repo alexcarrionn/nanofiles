@@ -20,6 +20,7 @@ public class NFDirectoryServer {
 	 * Número de puerto UDP en el que escucha el directorio
 	 */
 	public static final int DIRECTORY_PORT = 6868;
+	//longitud del buffer
 	private static final int MAX_MSG_SIZE_BYTES = 128;
 
 
@@ -38,7 +39,7 @@ public class NFDirectoryServer {
 	 */
 	private HashMap<Integer, String> sessionKeys;
 	/*
-	 * TODO: Añadir aquí como atributos las estructuras de datos que sean necesarias
+	 * Añadir aquí como atributos las estructuras de datos que sean necesarias
 	 * para mantener en el directorio cualquier información necesaria para la
 	 * funcionalidad del sistema nanoFilesP2P: ficheros publicados, servidores
 	 * registrados, etc.
@@ -62,9 +63,9 @@ public class NFDirectoryServer {
 		 * Guardar la probabilidad de pérdida de datagramas (simular enlace no
 		 * confiable)
 		 */
-		messageDiscardProbability = corruptionProbability;
+		setMessageDiscardProbability(corruptionProbability);
 		/*
-		 * TODO: (Boletín UDP) Inicializar el atributo socket: Crear un socket UDP
+		 * Inicializar el atributo socket: Crear un socket UDP
 		 * ligado al puerto especificado por el argumento directoryPort en la máquina
 		 * local,
 		 */
@@ -73,7 +74,7 @@ public class NFDirectoryServer {
 		System.out.println("Server listening on socket addresss " + socket.getLocalSocketAddress());
 		
 		/*
-		 * TODO: (Boletín UDP) Inicializar el resto de atributos de esta clase
+		 * Inicializar el resto de atributos de esta clase
 		 * (estructuras de datos que mantiene el servidor: nicks, sessionKeys, etc.)
 		 */
 		nicks = new HashMap<>(); 
@@ -95,7 +96,7 @@ public class NFDirectoryServer {
 		InetSocketAddress clientAddr = null;
 		int dataLength = -1;
 		/*
-		 * TODO: (Boletín UDP) Crear un búfer para recibir datagramas y un datagrama
+		 * Crear un búfer para recibir datagramas y un datagrama
 		 * asociado al búfer
 		 */
 		byte[] receptionBuffer = new byte[MAX_MSG_SIZE_BYTES];
@@ -312,5 +313,13 @@ public class NFDirectoryServer {
 		}
 		return response;
 
+	}
+
+	public double getMessageDiscardProbability() {
+		return messageDiscardProbability;
+	}
+
+	public void setMessageDiscardProbability(double messageDiscardProbability) {
+		this.messageDiscardProbability = messageDiscardProbability;
 	}
 }

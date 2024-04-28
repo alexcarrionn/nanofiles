@@ -1,18 +1,18 @@
 package es.um.redes.nanoFiles.tcp.server;
 
-import java.io.BufferedReader;
+//import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
+//import java.io.InputStreamReader;
 import java.net.BindException;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.SocketTimeoutException;
+//import java.net.SocketTimeoutException;
 
 public class NFServerSimple {
 
-	private static final int SERVERSOCKET_ACCEPT_TIMEOUT_MILISECS = 1000;
-	private static final String STOP_SERVER_COMMAND = "fgstop";
+	//private static final int SERVERSOCKET_ACCEPT_TIMEOUT_MILISECS = 1000;
+	//private static final String STOP_SERVER_COMMAND = "fgstop";
 	private static final int PORT = 10000;
 	private ServerSocket serverSocket = null;
 	private int port = PORT; 
@@ -46,22 +46,22 @@ public class NFServerSimple {
 	 */
 	public void run() throws IOException {
 		/*
-		 * TODO: Comprobar que el socket servidor está creado y ligado
+		 *Comprobar que el socket servidor está creado y ligado
 		 */
 		while (true) {
 			try {
 				/*
-				 * TODO: Comprobar que el socket servidor está creado y ligado
+				 *Comprobar que el socket servidor está creado y ligado
 				 */
 				System.out.println("* Servidor en el puerto : "
 						+ serverSocket.getLocalPort());
 				/*
-				 * TODO: Usar el socket servidor para esperar conexiones de otros peers que
+				 * Usar el socket servidor para esperar conexiones de otros peers que
 				 * soliciten descargar ficheros
 				 */
 				Socket socket = serverSocket.accept();
 				/*
-				 * TODO: Al establecerse la conexión con un peer, la comunicación con dicho
+				 * Al establecerse la conexión con un peer, la comunicación con dicho
 				 * cliente se hace en el método NFServerComm.serveFilesToClient(socket), al cual
 				 * hay que pasarle el socket devuelto por accept
 				 */

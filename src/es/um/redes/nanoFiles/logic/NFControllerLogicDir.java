@@ -53,7 +53,7 @@ public class NFControllerLogicDir {
 	protected boolean doLogin(String directoryHostname, String nickname) throws IOException {
 
 		/*
-		 * TODO: Debe crear un objeto DirectoryConnector a partir del parámetro
+		 * Debe crear un objeto DirectoryConnector a partir del parámetro
 		 * directoryHostname y guardarlo en el atributo correspondiente para que pueda
 		 * ser utilizado por el resto de métodos de esta clase. A continuación,
 		 * utilizarlo para comunicarse con el directorio y tratar de realizar el
@@ -81,7 +81,7 @@ public class NFControllerLogicDir {
 	 */
 	public boolean doLogout() throws IOException {
 		/*
-		 * TODO: Comunicarse con el directorio (a través del directoryConnector) para
+		 * Comunicarse con el directorio (a través del directoryConnector) para
 		 * dar de baja a este usuario. Se debe enviar la clave de sesión para
 		 * identificarse. Devolver éxito/fracaso de la operación.
 		 */
@@ -103,7 +103,7 @@ public class NFControllerLogicDir {
 	 */
 	protected boolean getAndPrintUserList() throws IOException {
 		/*
-		 * TODO: Obtener la lista de usuarios registrados. Comunicarse con el directorio
+		 * Obtener la lista de usuarios registrados. Comunicarse con el directorio
 		 * (a través del directoryConnector) para obtener la lista de nicks registrados
 		 * e imprimirla por pantalla. Devolver éxito/fracaso de la operación.
 		 */
@@ -153,7 +153,7 @@ public class NFControllerLogicDir {
 
 	public boolean registerFileServer(int serverPort) {
 		/*
-		 * TODO: Darse de alta en el directorio como servidor. Comunicarse con el
+		 * Darse de alta en el directorio como servidor. Comunicarse con el
 		 * directorio (a través del directoryConnector) para enviar el número de puerto
 		 * TCP en el que escucha el servidor de ficheros que habremos arrancado
 		 * previamente. Se debe enviar la clave de sesión para identificarse. Devolver
@@ -178,14 +178,16 @@ public class NFControllerLogicDir {
 	 */
 	protected boolean publishLocalFiles() throws IOException {
 		/*
-		 * TODO: Comunicarse con el directorio (a través del directoryConnector) para
+		 * Comunicarse con el directorio (a través del directoryConnector) para
 		 * enviar la lista de ficheros servidos por este peer. Los ficheros de la
 		 * carpeta local compartida están disponibles en NanoFiles.db). Se debe enviar
 		 * la clave de sesión para identificarse. Devolver éxito/fracaso de la
 		 * operación.
 		 */
 		boolean result = false;
+		//obtenemos los ficheros que hay actualmente en nf-shared
 		FileInfo[] ficheros = NanoFiles.db.getFiles();
+		//si los ficheros no estan vacios hace la funcion publishLocalFiles
 		if(ficheros != null) {
 			result = directoryConnector.publishLocalFiles(ficheros);
 			System.out.println("*Successfully published!");}
@@ -207,8 +209,8 @@ public class NFControllerLogicDir {
 	 */
 	private InetSocketAddress lookupServerAddrByUsername(String nickname) throws IOException {
 		/*
-		 * TODO: Obtener IP:puerto de un servidor de ficheros a partir de su nickname.
-		 * Comunicarse con el directorio (a través del directoryConnector) para
+		 * Obtener IP:puerto de un servidor de ficheros a partir de su nickname.
+		 * Comunicarse con el directorio para
 		 * preguntar la dirección de socket en la que el usuario con 'nickname' está
 		 * sirviendo ficheros. Si la operación fracasa (no se obtiene una respuesta con
 		 * IP:puerto válidos), se debe devolver null.
@@ -308,11 +310,12 @@ public class NFControllerLogicDir {
 	 */
 	public boolean unregisterFileServer() throws IOException {
 		/*
-		 * TODO: Comunicarse con el directorio (a través del directoryConnector) para
+		 * Comunicarse con el directorio para
 		 * darse de baja como servidor de ficheros. Se debe enviar la clave de sesión
 		 * para identificarse.
 		 */
 		boolean result = false; 
+		//llama a la funcionque te dejara darte debaja en el servidor
 		result = directoryConnector.unregisterServer();
 		System.out.println("*Enviada la solicitud para darse de baja");
 		if(result) {

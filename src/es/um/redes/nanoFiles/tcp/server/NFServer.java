@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.SocketTimeoutException;
 
 /**
  * Servidor que se ejecuta en un hilo propio. Creará objetos
@@ -15,7 +14,6 @@ public class NFServer implements Runnable {
 	private ServerSocket serverSocket = null;
 	
 	private boolean stopServer = false;
-	//private static final int SERVERSOCKET_ACCEPT_TIMEOUT_MILISECS = 1000;
 	private Socket socket;
 	private int port; 
 	
@@ -30,9 +28,9 @@ public class NFServer implements Runnable {
 	}
 
 	public NFServer() throws IOException {
+		//creamos un InetSocketAddres con 0 (para coger un puerto que este libre)
 	    InetSocketAddress serverSocketAddress = new InetSocketAddress(0);
 	    serverSocket = new ServerSocket();
-	    //serverSocket.setSoTimeout(SERVERSOCKET_ACCEPT_TIMEOUT_MILISECS);
 	    serverSocket.setReuseAddress(true);
 	    serverSocket.bind(serverSocketAddress);
 	    port = serverSocket.getLocalPort(); 
@@ -50,8 +48,6 @@ public class NFServer implements Runnable {
 	    while (!stopServer) {
 	        try {
 	            socket = serverSocket.accept();
-	            //System.out.println("New client in the port : " + socket.getPort());
-	            
 	            // Si el servidor está detenido, no deberías aceptar más conexiones
 	            if (!stopServer) {
 	                NFServerThread hilo = new NFServerThread(socket);

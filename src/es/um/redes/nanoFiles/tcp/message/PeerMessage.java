@@ -20,7 +20,7 @@ public class PeerMessage {
 	private int longitudByte = 0;
 
 	/*
-	 * TODO: Añadir atributos y crear otros constructores específicos para crear
+	 * Añadir atributos y crear otros constructores específicos para crear
 	 * mensajes con otros campos (tipos de datos)
 	 * 
 	 */
@@ -35,7 +35,7 @@ public class PeerMessage {
 	}
 
 	/*
-	 * TODO: Crear métodos getter y setter para obtener valores de nuevos atributos,
+	 * Crear métodos getter y setter para obtener valores de nuevos atributos,
 	 * comprobando previamente que dichos atributos han sido establecidos por el
 	 * constructor (sanity checks)
 	 */
@@ -84,7 +84,7 @@ public class PeerMessage {
 	 */
 	public static PeerMessage readMessageFromInputStream(DataInputStream dis) throws IOException {
 		/*
-		 * TODO: En función del tipo de mensaje, leer del socket a través del "dis" el
+		 * En función del tipo de mensaje, leer del socket a través del "dis" el
 		 * resto de campos para ir extrayendo con los valores y establecer los atributos
 		 * del un objeto DirMessage que contendrá toda la información del mensaje, y que
 		 * será devuelto como resultado. NOTA: Usar dis.readFully para leer un array de
@@ -96,9 +96,12 @@ public class PeerMessage {
 		
 		switch (opcode) {
 		case PeerMessageOps.OPCODE_DOWNLOAD_FROM:
+			//cambia el campo longitud
 			int longitud = dis.readInt();
 			message.setLongitudByte(longitud);
+			//lee la longitud y la pasa a array de bytes
 			byte[] hash = new byte[message.getLongitudByte()];
+			//lee el hash entero
 			dis.readFully(hash);
 			message.setHashCode(new String(hash, "UTF-8"));
 			break;
@@ -109,6 +112,7 @@ public class PeerMessage {
 			message.setData(file); 
 			break;
 		case PeerMessageOps.OPCODE_DOWNLOAD_FAIL:
+			//da un mensaje de error
 			System.err.println("Fichero no encontrado");
 			break;
 		default:
@@ -121,7 +125,7 @@ public class PeerMessage {
 
 	public void writeMessageToOutputStream(DataOutputStream dos) throws IOException {
 		/*
-		 * TODO: Escribir los bytes en los que se codifica el mensaje en el socket a
+		 * Escribir los bytes en los que se codifica el mensaje en el socket a
 		 * través del "dos", teniendo en cuenta opcode del mensaje del que se trata y
 		 * los campos relevantes en cada caso. NOTA: Usar dos.write para leer un array
 		 * de bytes, dos.writeInt para escribir un entero, etc.

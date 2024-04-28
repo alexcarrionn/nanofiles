@@ -6,8 +6,11 @@ import java.util.TreeMap;
 public class PeerMessageOps {
 
 	public static final byte OPCODE_INVALID_CODE = 0;
+	//para comprobar que la desacarga se ha hecho adecuadamente
 	public static final byte OPCODE_DOWNLOAD_OK = 1; 
+	//Para representar el download from 
 	public static final byte OPCODE_DOWNLOAD_FROM = 2;
+	//para comprobar que la desacarga no se ha hecho adecuadamente
 	public static final byte OPCODE_DOWNLOAD_FAIL = 3;
 
 
