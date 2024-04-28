@@ -163,11 +163,9 @@ public class NFController {
 			 * escucha conexiones de otros peers (método registerFileServer).
 			 */
 			boolean serverRunning = controllerPeer.backgroundServeFiles();
-			if (serverRunning) {
+			if (serverRunning) 
 				commandSucceeded = controllerDir.registerFileServer(controllerPeer.getServerPort());
-				if(commandSucceeded)
-					currentCommand = BGSERVE; 
-			}
+			updateCurrentState(commandSucceeded); 
 			break;
 		case NFCommands.COM_STOP_SERVER:
 			/*
@@ -178,8 +176,7 @@ public class NFController {
 			 */
 			controllerPeer.stopBackgroundFileServer();
 			commandSucceeded = controllerDir.unregisterFileServer();
-			if(commandSucceeded)
-				currentCommand = LOGGED_IN; 
+			//updateCurrentState(commandSucceeded); 
 			break;
 		case NFCommands.COM_DOWNLOADFROM:
 			/*
@@ -265,7 +262,7 @@ public class NFController {
 			}
 			break; 
 		case NFCommands.COM_USERLIST: 
-			if (currentState != LOGGED_IN) {
+			if (currentState != LOGGED_IN && currentState != BGSERVE) {
 				commandAllowed = false;
 				System.err.println("* You can't view the userlist because you are not logged in");
 			}
@@ -275,19 +272,19 @@ public class NFController {
 			break;
 			
 		case NFCommands.COM_DOWNLOADFROM: 
-			if (currentState != LOGGED_IN) {
+			if (currentState != LOGGED_IN && currentState != BGSERVE) {
 				commandAllowed = false;
 				System.err.println("* You can't Use downloadFrom because you are not logged in");
 			}
 			break;
 		case NFCommands.COM_FILELIST: 
-			if (currentState != LOGGED_IN) {
+			if (currentState != LOGGED_IN && currentState != BGSERVE) {
 				commandAllowed = false;
 				System.err.println("* You can't view the FileList because you are not logged in");
 			}
 			break;
 		case NFCommands.COM_PUBLISH: 
-			if (currentState != LOGGED_IN) {
+			if (currentState != LOGGED_IN && currentState != BGSERVE) {
 				commandAllowed = false;
 				System.err.println("* You can't publish your's files because you are not logged in");
 			}
@@ -320,6 +317,13 @@ public class NFController {
 		case NFCommands.COM_LOGOUT: {
 			currentState = LOGGED_OUT;
 			break;
+		}
+		
+		case NFCommands.COM_BGSERVE:{
+			currentState = BGSERVE; 
+		}
+		case NFCommands.COM_STOP_SERVER:{
+			currentState = LOGGED_IN; 
 		}
 		
 		default:

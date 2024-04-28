@@ -20,7 +20,7 @@ public class NFDirectoryServer {
 	 * Número de puerto UDP en el que escucha el directorio
 	 */
 	public static final int DIRECTORY_PORT = 6868;
-	private static final int MAX_MSG_SIZE_BYTES = 32;
+	private static final int MAX_MSG_SIZE_BYTES = 128;
 
 
 	/**
@@ -178,12 +178,10 @@ public class NFDirectoryServer {
 		 * (el "estado" guardado en el directorio: nicks, sessionKeys, servers,
 		 * files...)
 		 */
+		
 		String operation = msg.getOperation();
 		DirMessage response = null;
-
-
-
-
+		
 		switch (operation) {
 		case DirMessageOps.OPERATION_LOGIN: {
 			String username = msg.getNickname();
@@ -272,7 +270,7 @@ public class NFDirectoryServer {
 			response = new DirMessage(DirMessageOps.OPERATION_REGISTER_FILE_SERVER);
 			
 			String username = msg.getNickname();
-			int port = msg.getPort(); 
+			int port = msg.getPort();
 			InetSocketAddress server = new InetSocketAddress(clientAddr.getAddress(), port);
 			if(!fileServers.containsKey(username)) {
 				fileServers.put(username, server); 
@@ -292,6 +290,21 @@ public class NFDirectoryServer {
 			}
 			break; 
 		}
+		
+		case DirMessageOps.OPERATION_REQUEST_IP:{
+			System.out.println("* solicitud de Ip");
+			response = new DirMessage(DirMessageOps.OPERATION_REQUEST_IP); 
+			String username = msg.getNickname();
+
+			InetSocketAddress address = fileServers.getOrDefault(username, null);
+			if(address != null) {
+				response.setIprequest(address.getAddress());
+				response.setPort(address.getPort());
+			}
+			break; 
+		}
+		
+		
 
         
 		default:

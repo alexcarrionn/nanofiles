@@ -1,5 +1,8 @@
 package es.um.redes.nanoFiles.udp.message;
 
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.UnknownHostException;
 /*import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;*/
@@ -31,7 +34,7 @@ public class DirMessage {
 	private static final String FIELDNAME_OPERATION = "operation";
 	
 	/*
-	 * TODO: Definir de manera simbólica los nombres de todos los campos que pueden
+	 * Definir de manera simbólica los nombres de todos los campos que pueden
 	 * aparecer en los mensajes de este protocolo (formato campo:valor)
 	 */
 	private static final String FIELDNAME_NICKNAME = "nickname";
@@ -44,8 +47,10 @@ public class DirMessage {
 	private static final String FIELDNAME_PUBLISH_RESPONSE = "publishresponse";
 	private static final String FIELDNAME_PUBLISH = "publish";
 	private static final String FIELDNAME_REGISTEROK = "registerok";
-	private static final String FIELDNAME_UNREGISTEROK = "unregister";
+	private static final String FIELDNAME_UNREGISTEROK = "unregisterok";
 	private static final String FIELDNAME_FILE_SERVERS = "fileservers";
+	private static final String FIELDNAME_REQUEST_IP = "request_ip";
+
 	/**
 	 * Tipo del mensaje, de entre los tipos definidos en PeerMessageOps.
 	 */
@@ -65,6 +70,7 @@ public class DirMessage {
 	private boolean publishResponse;
 	private boolean unregisterOk; 
 	private boolean registerOk; 
+	private InetAddress iprequest;
 	//atributos del mensaje con el getUser una lista, aqui poner una lista 
 
 	public DirMessage(String op) {
@@ -184,6 +190,15 @@ public class DirMessage {
     public void setPublishResponse(boolean publishResponse) {
         this.publishResponse = publishResponse;
     }
+    
+	public InetAddress getIprequest() {
+		return iprequest;
+	}
+
+
+	public void setIprequest(InetAddress iprequest) {
+		this.iprequest = iprequest;
+	}
 
 
 	/**
@@ -194,8 +209,9 @@ public class DirMessage {
 	 * @param message El mensaje recibido por el socket, como cadena de caracteres
 	 * @return Un objeto PeerMessage que modela el mensaje recibido (tipo, valores,
 	 *         etc.)
+	 * @throws UnknownHostException 
 	 */
-	public static DirMessage fromString(String message) {
+	public static DirMessage fromString(String message) throws UnknownHostException {
 		/*
 		 * TODO: Usar un bucle para parsear el mensaje línea a línea, extrayendo para
 		 * cada línea el nombre del campo y el valor, usando el delimitador DELIMITER, y
@@ -207,14 +223,12 @@ public class DirMessage {
 		String[] lines = message.split(END_LINE + "");
 		// Local variables to save data during parsing
 		DirMessage m = null;
-
-
-
+		
 		for (String line : lines) {
 			int idx = line.indexOf(DELIMITER); // Posición del delimitador
 			String fieldName = line.substring(0, idx).toLowerCase(); // minúsculas
 			String value = line.substring(idx + 1).trim();
-
+			
 			switch (fieldName) {
 			case FIELDNAME_OPERATION: {
 				assert (m == null);
@@ -252,7 +266,6 @@ public class DirMessage {
 				break;
 			}
 			case FIELDNAME_PORT: {
-				assert (m.getOperation().equals(DirMessageOps.OPERATION_FGSERVE));
 				m.setPort(Integer.parseInt(value));
 				break;
 			}
@@ -310,6 +323,11 @@ public class DirMessage {
 		        m.setFilesServer(value.split(", "));
 		        break;
 			}
+            case FIELDNAME_REQUEST_IP: {
+            	value = value.substring(1, value.length());
+            	m.setIprequest(InetAddress.getByName(value));
+            	break;
+            }
             
             
             default:
@@ -413,9 +431,19 @@ public class DirMessage {
 			}
 			break;
 		}
+		case DirMessageOps.OPERATION_REQUEST_IP: {
+			// Si es un response, la variable nickname no estará inicializada
+			if (nickname != null) {
+				sb.append(FIELDNAME_NICKNAME + DELIMITER + nickname + END_LINE);
+			} else {
+				sb.append(FIELDNAME_REQUEST_IP + DELIMITER + iprequest.toString() + END_LINE);
+				sb.append(FIELDNAME_PORT + DELIMITER + port + END_LINE);
+			}
+			break;
+		}
 				
 		}
-	    sb.append(END_LINE); // Marcamos el final del mensaje
+	    sb.append(END_LINE); 
 	    return sb.toString();
 	}
 }

@@ -3,7 +3,6 @@ package es.um.redes.nanoFiles.logic;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.UnknownHostException;
 import java.util.LinkedList;
 import java.util.Map;
 
@@ -204,8 +203,9 @@ public class NFControllerLogicDir {
 	 * @return La dirección de socket del servidor identificado por dich nick, o
 	 *         null si no se encuentra ningún usuario con ese nick que esté
 	 *         sirviendo ficheros.
+	 * @throws IOException 
 	 */
-	private InetSocketAddress lookupServerAddrByUsername(String nickname) {
+	private InetSocketAddress lookupServerAddrByUsername(String nickname) throws IOException {
 		/*
 		 * TODO: Obtener IP:puerto de un servidor de ficheros a partir de su nickname.
 		 * Comunicarse con el directorio (a través del directoryConnector) para
@@ -214,7 +214,8 @@ public class NFControllerLogicDir {
 		 * IP:puerto válidos), se debe devolver null.
 		 */
 		InetSocketAddress serverAddr = null;
-
+		serverAddr = directoryConnector.lookupServerAddrByUsername(nickname); 
+		
 
 
 		return serverAddr;
@@ -229,9 +230,9 @@ public class NFControllerLogicDir {
 	 *                                   preguntamos
 	 * @return La dirección de socket del peer identificado por dicho nick, o null
 	 *         si no se encuentra ningún peer con ese nick.
-	 * @throws UnknownHostException 
+	 * @throws IOException 
 	 */
-	public InetSocketAddress getServerAddress(String serverNicknameOrSocketAddr) throws UnknownHostException {
+	public InetSocketAddress getServerAddress(String serverNicknameOrSocketAddr) throws IOException {
 		InetSocketAddress fserverAddr = null;
 		
 		if (serverNicknameOrSocketAddr.contains(":")) { // Then it has to be a socket address (IP:port)

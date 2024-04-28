@@ -97,6 +97,7 @@ public class DirectoryConnector {
 		}
 
 		DatagramPacket packetToServer = new DatagramPacket(requestData, requestData.length, directoryAddress);
+		
 		socket.send(packetToServer);
 		//System.out.println("Sending message to server: " + new String(requestData) );
 		
@@ -214,8 +215,8 @@ public class DirectoryConnector {
 		byte[] sendData = messageUserList.getBytes(); 
 		byte[] response = sendAndReceiveDatagrams(sendData); 
 		DirMessage r = DirMessage.fromString(new String(response));
-		resultMap.put("* users", r.getUsers());
-        resultMap.put("* fileservers",r.getFilesServer()); 
+		resultMap.put("users", r.getUsers());
+        resultMap.put("fileservers",r.getFilesServer()); 
 		return resultMap;
 	}
 
@@ -258,6 +259,7 @@ public class DirectoryConnector {
 	        // Crear un mensaje de solicitud de registro de servidor
 	        DirMessage registerMessage = new DirMessage(DirMessageOps.OPERATION_REGISTER_FILE_SERVER);
 	        registerMessage.setPort(serverPort);
+	        registerMessage.setSessionKey(this.getSessionKey());
 	        registerMessage.setNickname(this.getUsername());
 	        // Convertir el mensaje a una cadena de bytes
 	        byte[] requestData = registerMessage.toString().getBytes();
@@ -299,13 +301,26 @@ public class DirectoryConnector {
 	 * @return La dirección de socket del servidor en caso de que haya algún
 	 *         servidor dado de alta en el directorio con ese nick, o null en caso
 	 *         contrario.
+	 * @throws IOException 
 	 */
-	public InetSocketAddress lookupServerAddrByUsername(String nick) {
+	public InetSocketAddress lookupServerAddrByUsername(String nick) throws IOException {
 		InetSocketAddress serverAddr = null;
 		// TODO: Ver TODOs en logIntoDirectory y seguir esquema similar
-
-
-
+		
+		DirMessage m = new DirMessage(DirMessageOps.OPERATION_REQUEST_IP);
+		m.setNickname(nick);
+		
+		String messageRequest = m.toString();
+		
+		byte[] sendData = messageRequest.getBytes();
+		
+		byte[] response = sendAndReceiveDatagrams(sendData);
+		DirMessage r = DirMessage.fromString(new String(response));
+		
+		InetAddress ip = r.getIprequest(); 
+		int port = r.getPort(); 
+		serverAddr = new InetSocketAddress(ip,port); 
+		
 		return serverAddr;
 	}
 

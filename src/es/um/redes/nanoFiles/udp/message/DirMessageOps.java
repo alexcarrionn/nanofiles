@@ -18,7 +18,7 @@ public class DirMessageOps {
 	public static final String OPERATION_REGISTER_FILE_SERVER = "RegisterOk";
 	public static final String OPERATION_PUBLISH_RESPONSE = "Publish_response";
 	public static final String OPERATION_UNREGISTER_SERVER = "UnregisterServer";
-	
+	public static final String OPERATION_REQUEST_IP = "request_ip";
 	
 	
 
