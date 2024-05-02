@@ -9,6 +9,7 @@ import java.net.UnknownHostException;
 import java.util.LinkedList;
 //import java.util.Random;
 
+import es.um.redes.nanoFiles.application.NanoFiles;
 import es.um.redes.nanoFiles.tcp.client.NFConnector;
 import es.um.redes.nanoFiles.tcp.server.NFServer;
 import es.um.redes.nanoFiles.tcp.server.NFServerSimple;
@@ -98,7 +99,7 @@ public class NFControllerLogicP2P {
 	        System.err.println("* Cannot start download - No server address provided");
 	        return false;
 	    }
-	    String folderPath = "nf-shared";
+	    String folderPath = NanoFiles.sharedDirname;
 	    File downloadFile = new File(folderPath, localFileName);
 
 	    // Verificar si ya existe un archivo con el mismo nombre
@@ -178,8 +179,11 @@ public class NFControllerLogicP2P {
 		/*
 		 * Envia una señal para detener nuestro servidor de ficheros en segundo plano
 		 */
+		if(server != null) {
 		server.stopserver();
-		server = null; 
+		server = null; }
+		else 
+			System.err.println("* No hay ningun servidor activo");
 	}
 
 }
